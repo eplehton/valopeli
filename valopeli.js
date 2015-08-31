@@ -1,16 +1,12 @@
 
-
-
 function disco() {
 
-	console.log("rai");
-	
-	
 	var reds = [];
-
-	for (var i=0; i<10; i++) {
+	var flashRedsintervals = 500;
+	
+	for (var i=0; i<500; i++) {
 		
-		var x = Math.floor(Math.random() * (9-1) + 1);
+		var x = Math.floor(Math.random() * (10-1) + 1);
 		if (reds.length == 0) {
 			reds.push(x); 
 		} else {
@@ -24,57 +20,68 @@ function disco() {
 	
 	console.log(reds);
 	
-	function flash(position) {
-		console.log(reds);
-		console.log(reds[position]);
+	function flashReds(position) {
 		var cellId = "cell" + reds[position];
-		switchColor(cellId);
+		var randomNumber = Math.floor(Math.random() * (60));
+		if(position > 0) {
+			switchColor("cell" + reds[position - 1], "white")
+		}
+		
+		switchColor(cellId, "red");
 		
 		if (position < reds.length - 1) {
-			setTimeout( function() { flash(position+1); }, 1000 );
+			setTimeout( function() { flashReds(position+1); }, flashRedsintervals );
+			if (randomNumber < 3) {
+				flashBlue(position);
+			}
+			if (randomNumber == 4) {
+				flashDistractor(position, "green");
+			}
+		}
+		
+		if (flashRedsintervals < 200) {
+			flashRedsintervals--;
+		} else {
+			flashRedsintervals -= 2;
 		}
 	}
 	
-	flash(0);
+	function flashBlue(position) {
+		var nextCellId = "cell" + reds[position + 1];
+		switchColor(nextCellId, "blue");
+	}
 	
-        //setInterval("switchColor('cell1')", 3000);
-	//setInterval("switchColor('cell3')", 500);
-	//setInterval("switchColor('cell7')", 1000);
-	//setInterval("switchColor('cell8')", 2000);
-    
-
+	function flashDistractor(position, color) {
+		var rNumber = Math.floor(Math.random() * (9-1) + 1);
+		console.log(rNumber);
+		if(rNumber != position) {
+			switchColor("cell" + rNumber, "green");
+			setTimeout(function() {switchColor("cell" + rNumber, "white");}, flashRedsintervals);
+		} else {
+			flashDistractor(position, "green");
+		}
+	}
+	
+	flashReds(0);
 }
 
-
-function switchColor(cellId) {
-    console.log(cellId);
-    //alert("Hoi!");
+function switchColor(cellId, color) {
     var e = document.getElementById(cellId);
-    
-    var bgColor = e.style.backgroundColor;
-    if (bgColor == 'green') {
-	e.style.backgroundColor = "red";
-    } else {
-        e.style.backgroundColor = "green";
-    }
-    //setTimeout("switchColor('"+ cellId +"');", 2000);
+	e.style.backgroundColor = color;
 }
 
-
-
-
-
-
-
-// events
-
-//document.addEventListener("ready", vcxvxzbz  )
 
 $(document).ready( function() {
 
-	$("#gametable").find("td").click( function(ev) { 
-			var id = ev.target.id;
-			switchColor(id); });
+	$("#gametable").find("td").click( 
+		function(ev) { 
+			console.log(ev.target.id);
+			console.log(reds[position]);
+			if (ev.target.id != "cell" + reds[position]) {
+				console.log(ev.target.id);
+			}
+		}
+	);
 	
 	disco();	
 

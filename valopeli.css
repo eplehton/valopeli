@@ -1,15 +1,13 @@
 
-.body {
-   padding: 5ex;
+body {
+   padding: 20px;
    text-align: center;
 }
 
 #gametable {
-    width: 80%;
-    height: 80%;
+    width: 100%;
+    height: 100%;
 }
 
-#cell1 {
-    background-color: red;
-}
+
 
