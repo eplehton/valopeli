@@ -1,7 +1,8 @@
+var reds = [];
 
 function disco() {
 
-	var reds = [];
+	//reds = [];
 	var flashRedsintervals = 500;
 	
 	for (var i=0; i<500; i++) {
@@ -73,8 +74,10 @@ function switchColor(cellId, color) {
 
 $(document).ready( function() {
 
-	$("#gametable").find("td").click( 
+
+	$("#gametable").find("td").click(
 		function(ev) { 
+			console.log("erairiariaria");
 			console.log(ev.target.id);
 			console.log(reds[position]);
 			if (ev.target.id != "cell" + reds[position]) {
