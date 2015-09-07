@@ -1,9 +1,9 @@
 var reds = [];
+var nextPress = 0;
 
 function disco() {
 
-	//reds = [];
-	var flashRedsintervals = 500;
+	var flashRedsintervals = 2000;
 	
 	for (var i=0; i<500; i++) {
 		
@@ -12,23 +12,20 @@ function disco() {
 			reds.push(x); 
 		} else {
 			while (reds[ reds.length-1 ] == x) {
-				console.log(x);
 				x = Math.floor(Math.random() * (9-1) + 1)
 			}
 			reds.push(x);
 		}
 	}
 	
-	console.log(reds);
-	
 	function flashReds(position) {
-		var cellId = "cell" + reds[position];
+		var cellId = "cellButton" + reds[position];
 		var randomNumber = Math.floor(Math.random() * (60));
 		if(position > 0) {
-			switchColor("cell" + reds[position - 1], "white")
+			switchImageColor("cellButton" + reds[position - 1], "gray");
 		}
 		
-		switchColor(cellId, "red");
+		switchImageColor(cellId, "red");
 		
 		if (position < reds.length - 1) {
 			setTimeout( function() { flashReds(position+1); }, flashRedsintervals );
@@ -48,16 +45,16 @@ function disco() {
 	}
 	
 	function flashBlue(position) {
-		var nextCellId = "cell" + reds[position + 1];
-		switchColor(nextCellId, "blue");
+		var nextCellId = "cellButton" + reds[position + 1];
+		switchImageColor(nextCellId, "blue");
 	}
 	
 	function flashDistractor(position, color) {
 		var rNumber = Math.floor(Math.random() * (9-1) + 1);
 		console.log(rNumber);
 		if(rNumber != position) {
-			switchColor("cell" + rNumber, "green");
-			setTimeout(function() {switchColor("cell" + rNumber, "white");}, flashRedsintervals);
+			switchImageColor("cellButton" + rNumber, "green");
+			setTimeout(function() {switchImageColor("cellButton" + rNumber, "gray");}, flashRedsintervals);
 		} else {
 			flashDistractor(position, "green");
 		}
@@ -66,26 +63,49 @@ function disco() {
 	flashReds(0);
 }
 
-function switchColor(cellId, color) {
+function switchCellColor(cellId, color) {
     var e = document.getElementById(cellId);
 	e.style.backgroundColor = color;
 }
 
-
+function switchImageColor(cellButtonId, color) {
+	document.getElementById(cellButtonId).src="images/button_" + color + ".png";
+}
 $(document).ready( function() {
-
-
+	
+	$("#pietimerArea").pietimer({
+	    seconds: 3,
+		color: 'rgba(0, 0, 0, 0.8)',
+		height: 500,
+		width: 500	
+	}, function(){
+		disco();
+	});
+	
 	$("#gametable").find("td").click(
 		function(ev) { 
-			console.log("erairiariaria");
-			console.log(ev.target.id);
-			console.log(reds[position]);
-			if (ev.target.id != "cell" + reds[position]) {
-				console.log(ev.target.id);
+			if (ev.target.id != "cell" + reds[nextPress]) {
+				//location.reload();
 			}
+			//nextPress++;
 		}
 	);
 	
-	disco();	
-
+	$("#gametable").find("img").click(
+		function(ev) {
+			if (ev.target.id != "cellButton" + reds[nextPress]) {
+				location.reload();
+			}
+			nextPress++;
+		}
+	)
+	
+	$("startButton").click(
+		function(ev) {
+			console.log("sfhso");
+			disco();
+		}
+	);
+	
+	$("#pietimerArea").pietimer("start");
 });

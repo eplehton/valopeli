@@ -1,30 +1,52 @@
+<!DOCTYPE html>
 <html>
-
 	<head>
 		<title>Valopeli</title>
 		<link href="valopeli.css" rel="stylesheet" type="text.css" />
 		<script src="jquery-2.1.4.js"></script>
+		<script src="pietimer/jquery.pietimer.js"></script>
 		<script src="valopeli.js"></script>
 	</head>
 
-<body">
+<body>
+
+<div id = pietimerArea></div>
 
 <table id="gametable">
-  <tr>
-    <td id="cell1"></td> 
-    <td id="cell2"></td>
-    <td id="cell3"></td>
-  </tr>
-  <tr>
-    <td id="cell4"></td> 
-    <td id="cell5"></td>
-    <td id="cell6"></td>
-  </tr>
-  <tr>
-    <td id="cell7"></td> 
-    <td id="cell8"></td>
-    <td id="cell9"></td>
-  </tr>
+    <tr>
+		<td id="cell1" class=cell>
+			<img src="images/button_gray.png" id = "cellButton1" class=buttons style="width:300px;height:300px;">
+		</td>
+		<td id="cell2" class=cell>
+			<img src="images/button_gray.png" id = "cellButton2" class=buttons style="width:300px;height:300px;">
+		</td>
+		<td id="cell3" class=cell>
+			<img src="images/button_gray.png" id = "cellButton3" class=buttons style="width:300px;height:300px;">
+		</td>
+    </tr>
+    <tr>
+		<td id="cell4" class=cell>
+			<img src="images/button_gray.png" id = "cellButton4" class=buttons style="width:300px;height:300px;">
+		</td> 
+		<td id="cell5" class=cell>
+			<img src="images/button_gray.png" id = "cellButton5" class=buttons style="width:300px;height:300px;">
+			<div id = pietimerArea></div>
+		</td>
+		<td id="cell6" class=cell>
+			<img src="images/button_gray.png" id = "cellButton6" class=buttons style="width:300px;height:300px;">
+		</td>
+    </tr>
+    <tr>
+		<td id="cell7" class=cell>
+			<img src="images/button_gray.png" id = "cellButton7" class=buttons style="width:300px;height:300px;">
+		</td> 
+		<td id="cell8" class=cell>
+			<img src="images/button_gray.png" id = "cellButton8" class=buttons style="width:300px;height:300px;">
+		</td>
+		<td id="cell9" class=cell>
+			<img src="images/button_gray.png" id = "cellButton9" class=buttons style="width:300px;height:300px;">
+		</td>
+    </tr>
 </table>
 
 </body>
