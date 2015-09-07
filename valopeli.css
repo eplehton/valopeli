@@ -8,12 +8,13 @@
 
 #gametable {
 	margin: auto;
-    width: 60%;
+    width: 55%;
 	padding-top: 50px;
 	z-index: -1;
 }
 
 .cell {
+	padding: 20px;
 	text-align: center;
 }
 
@@ -21,7 +22,7 @@
     position: fixed;
     left: 50%;
 	margin-left: -250px;
-	top: 280px;
+	top: 320px;
 	z-index: 1;
 }
 
@@ -29,14 +30,22 @@
 	width: 300px;
 }
 
-.circle{
+.circle, #cellCircle1, #cellCircle2, #cellCircle3, #cellCircle4, #cellCircle5, #cellCircle6, #cellCircle7, #cellCircle8, #cellCircle9 {
+	margin: auto;
 	width: 300px;
 	height: 300px;
-	background: red;
-	-moz-border-radius: 50px;
-	-webkit-border-radius: 50px;
-	border-radius: 50px;
+	background: -moz-radial-gradient(center, ellipse cover, #ffffff 0%, #000000 100%); /* ff3.6+ */
+	background: -webkit-gradient(radial, center center, 0px, center center, 100%, color-stop(0%, #ffffff), color-stop(100%, #000000)); /* safari4+,chrome */
+	background: -webkit-radial-gradient(center, ellipse cover, #ffffff 0%, #000000 100%); /* safari5.1+,chrome10+ */
+	background: -o-radial-gradient(center, ellipse cover, #ffffff 0%, #000000 100%); /* opera 11.10+ */
+	background: -ms-radial-gradient(center, ellipse cover, #ffffff 0%, #000000 100%); /* ie10+ */
+	background: radial-gradient(ellipse at center, #ffffff 0%, #000000 100%); /* w3c */
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', endColorstr='#000000',GradientType=1 ); /* ie6-9 *//
+	-moz-border-radius: 50%;
+	-webkit-border-radius: 50%;
+	border-radius: 50%;
 }
+
 
 #forwardButton {
   background: #0099ff;
