@@ -2,12 +2,16 @@ var reds = [];
 var nextPress = 0;
 var testResults = [];
 var stopGame = false;
+var numberOfTestGames = 3;
+var gameInterval = 500;
+var isStaticGame = false;
+var lastInterval = gameInterval;
+var points = 0;
 
 function game(isStaticGame, flashRedsintervals) {
 	
-	
+	reds = []
 	for (var i=0; i<500; i++) {
-		
 		var x = Math.floor(Math.random() * (10-1) + 1);
 		if (reds.length == 0) {
 			reds.push(x); 
@@ -23,14 +27,13 @@ function game(isStaticGame, flashRedsintervals) {
 		if (stopGame == false) {
 			var cellId = "#cellCircle" + reds[position];
 			var randomNumber = Math.floor(Math.random() * (60));
-			if(position > 0) {
-				switchColorGray("#cellCircle" + reds[position - 1]);
-			}
 			
 			switchColorRed(cellId);
 			
 			if (position < reds.length - 1) {
 				setTimeout( function() { flashReds(position+1); }, flashRedsintervals);
+				console.log(flashRedsintervals);
+				setTimeout( function() { switchColorGray(cellId); }, flashRedsintervals);
 				if (randomNumber < 3) {
 					flashBlue(position);
 				}
@@ -40,14 +43,8 @@ function game(isStaticGame, flashRedsintervals) {
 			}
 			
 			if(isStaticGame == false) {
-				if (flashRedsintervals < 200) {
-					flashRedsintervals--;
-				} else {
-					flashRedsintervals -= 2;
-				}			
+				flashRedsintervals = changeInterval(flashRedsintervals);			
 			}
-		} else {
-			testResults.push(flashRedsintervals);
 		}
 	}
 	
@@ -70,6 +67,13 @@ function game(isStaticGame, flashRedsintervals) {
 	flashReds(0);
 }
 
+function changeInterval(interval) {
+	if (interval < 200) {
+		return interval--;
+	} else {
+		return interval -= 2;
+	}
+}
 
 function switchColorRed(id) {
 	var circle = $(id);
@@ -115,16 +119,26 @@ function switchColorGreen(id) {
 	circle.css("filter", "progid:DXImageTransform.Microsoft.gradient( startColorstr='#00FF00', endColorstr='#000000',GradientType=1 )");
 }
 
+function average(array) {
+	var sum = 0;
+	for(var i = 0; i < array.length; i++) {
+		sum += array[i];
+	}
+	return parseInt(sum/array.length);
+} 
+
 $(document).ready( function() {
 	
 	$("#pietimerArea").pietimer({
-	    seconds: 3,
+	    seconds: 2,
 		color: 'rgba(0, 0, 0, 0.8)',
 		height: 500,
 		width: 500	
 	}, function(){
 		$("#pietimerArea").css("z-index", "-1");
-		game(false, 500);
+		$("#mask").css("z-index", "-1");
+		stopGame = false;
+		game(isStaticGame, gameInterval);
 	});
 	
 	$("#gametable").find("td").click(
@@ -139,7 +153,31 @@ $(document).ready( function() {
 	$("#gametable").find("div").click(
 		function(ev) {
 			if (ev.target.id != "cellCircle" + reds[nextPress]) {
+				nextPress = -1;
 				stopGame = true;
+				testResults.push(lastInterval);
+				console.log(testResults);
+				lastInterval = 500;
+				
+				$("#pietimerArea").css("z-index", "1");
+				$("#mask").css("z-index", "1");
+				
+				stopGame = true;
+				if (numberOfTestGames > 1) {
+					console.log("uusi nopeutuva peli");
+					$("#pietimerArea").pietimer("start");
+				} else {
+					console.log("uusi tasainen peli");
+					isStaticGame = true;
+					gameInterval = average(testResults);
+					setTimeout( function() { alert("peli loppui"); }, 5*60000);
+					$("#pietimerArea").pietimer("start");
+				}
+				numberOfTestGames--;
+			} else {
+				points++;
+				$("#points").text(points);
+				lastInterval = changeInterval(lastInterval);
 			}
 			nextPress++;
 		}

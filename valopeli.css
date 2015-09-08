@@ -7,10 +7,18 @@
 }
 
 #gametable {
-	margin: auto;
-    width: 55%;
-	padding-top: 50px;
+	position: absolute;
+	padding-left: 23%;
+    width: 50%;
+	padding-top: 10px;
 	z-index: -1;
+}
+
+#mask {
+	position: fixed;
+	width: 100%;
+	height: 100%;
+	z-index: 1;
 }
 
 .cell {
@@ -22,12 +30,20 @@
     position: fixed;
     left: 50%;
 	margin-left: -250px;
-	top: 320px;
+	top: 50%;
+	margin-top: -250px;
 	z-index: 1;
 }
 
 #kysely{
 	width: 300px;
+}
+
+#points {
+	position: fixed;
+	bottom: 7%;
+	right: 15%;
+	z-index: -1;
 }
 
 .circle, #cellCircle1, #cellCircle2, #cellCircle3, #cellCircle4, #cellCircle5, #cellCircle6, #cellCircle7, #cellCircle8, #cellCircle9 {
