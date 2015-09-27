@@ -193,6 +193,7 @@ function clearCycle() {
 	round = 0;
 	nextPress = 0;
 	numberOfTestGames = 3;
+	isGameTimeSet = false;
 }
 
 $(document).ready( function() {
@@ -222,7 +223,7 @@ $(document).ready( function() {
 		}
 	});
 	
-	$("#gametable").find("div").click(
+	$(".circle").click(
 		function(ev) {
 			pressData = [];
 			pressID++;

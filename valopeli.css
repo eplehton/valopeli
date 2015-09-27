@@ -46,10 +46,12 @@
 	z-index: -1;
 }
 
-.circle, #cellCircle1, #cellCircle2, #cellCircle3, #cellCircle4, #cellCircle5, #cellCircle6, #cellCircle7, #cellCircle8, #cellCircle9 {
-	margin: auto;
-	width: 300px;
-	height: 300px;
+#cellCircle1, #cellCircle2, #cellCircle3, #cellCircle4, #cellCircle5, #cellCircle6, #cellCircle7, #cellCircle8, #cellCircle9 {
+	position: fixed;
+	left: 50%;
+	top: 50%;
+	width: 200px;
+	height: 200px;
 	background: -moz-radial-gradient(center, ellipse cover, #ffffff 0%, #000000 100%); /* ff3.6+ */
 	background: -webkit-gradient(radial, center center, 0px, center center, 100%, color-stop(0%, #ffffff), color-stop(100%, #000000)); /* safari4+,chrome */
 	background: -webkit-radial-gradient(center, ellipse cover, #ffffff 0%, #000000 100%); /* safari5.1+,chrome10+ */
@@ -62,6 +64,29 @@
 	border-radius: 50%;
 }
 
+.row1 {
+	margin-top: -320px;
+}
+
+.row2 {
+	margin-top: -100px;
+}
+
+.row3 {
+	margin-top: +120px;
+}
+
+.column1 {
+	margin-left: -320px;
+}
+
+.column2 {
+	margin-left: -100px;
+}
+
+.column3 {
+	margin-left: +120px;
+}
 
 #forwardButton {
   background: #0099ff;
