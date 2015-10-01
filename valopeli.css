@@ -1,29 +1,9 @@
 
-#kysely {
-	padding-top: 50px;
-	margin: auto;
-	width: 100px;
-    text-align: left;
-}
-
-#gametable {
-	position: absolute;
-	padding-left: 23%;
-    width: 50%;
-	padding-top: 10px;
-	z-index: -1;
-}
-
 #mask {
 	position: fixed;
 	width: 100%;
 	height: 100%;
 	z-index: 1;
-}
-
-.cell {
-	padding: 20px;
-	text-align: center;
 }
 
 #pietimerArea {
@@ -33,17 +13,6 @@
 	top: 50%;
 	margin-top: -250px;
 	z-index: 1;
-}
-
-#kysely{
-	width: 300px;
-}
-
-#points {
-	position: fixed;
-	bottom: 7%;
-	right: 15%;
-	z-index: -1;
 }
 
 #cellCircle1, #cellCircle2, #cellCircle3, #cellCircle4, #cellCircle5, #cellCircle6, #cellCircle7, #cellCircle8, #cellCircle9 {
@@ -88,33 +57,52 @@
 	margin-left: +120px;
 }
 
-#forwardButton {
-  background: #0099ff;
-  background-image: -webkit-linear-gradient(top, #0099ff, #11232e);
-  background-image: -moz-linear-gradient(top, #0099ff, #11232e);
-  background-image: -ms-linear-gradient(top, #0099ff, #11232e);
-  background-image: -o-linear-gradient(top, #0099ff, #11232e);
-  background-image: linear-gradient(to bottom, #0099ff, #11232e);
-  -webkit-border-radius: 28;
-  -moz-border-radius: 28;
-  border-radius: 28px;
+#startbutton{
+	position: fixed;
+	left: 50%;
+	top: 85%;
+	margin-left: -90px;
+	margin-top: -25px;
+	z-index: 2;
+}
+
+#whitemask {
+	background: white;
+	position: fixed;
+	left: 50%;
+	top: 85%;
+	margin-left: -95px;
+	margin-top: -30px;
+	width: 200px;
+	height: 60px;
+	z-index: -1;
+}
+
+.btn {
+  background: #d10f0f;
+  background-image: -webkit-linear-gradient(top, #d10f0f, #7a0909);
+  background-image: -moz-linear-gradient(top, #d10f0f, #7a0909);
+  background-image: -ms-linear-gradient(top, #d10f0f, #7a0909);
+  background-image: -o-linear-gradient(top, #d10f0f, #7a0909);
+  background-image: linear-gradient(to bottom, #d10f0f, #7a0909);
+  -webkit-border-radius: 9;
+  -moz-border-radius: 9;
+  border-radius: 9px;
+  text-shadow: 3px 1px 3px #666666;
   font-family: Arial;
   color: #ffffff;
-  font-size: 15px;
+  font-size: 24px;
   padding: 10px 20px 10px 20px;
-  border: solid #1f6c9c 4px;
+  border: solid #000000 3px;
   text-decoration: none;
 }
 
-#forwardButton:hover {
-  background: #3cb0fd;
-  background-image: -webkit-linear-gradient(top, #3cb0fd, #0b5c91);
-  background-image: -moz-linear-gradient(top, #3cb0fd, #0b5c91);
-  background-image: -ms-linear-gradient(top, #3cb0fd, #0b5c91);
-  background-image: -o-linear-gradient(top, #3cb0fd, #0b5c91);
-  background-image: linear-gradient(to bottom, #3cb0fd, #0b5c91);
+.btn:hover {
+  background: #ff0000;
+  background-image: -webkit-linear-gradient(top, #ff0000, #d60808);
+  background-image: -moz-linear-gradient(top, #ff0000, #d60808);
+  background-image: -ms-linear-gradient(top, #ff0000, #d60808);
+  background-image: -o-linear-gradient(top, #ff0000, #d60808);
+  background-image: linear-gradient(to bottom, #ff0000, #d60808);
   text-decoration: none;
 }
-
-
-

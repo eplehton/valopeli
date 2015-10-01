@@ -8,24 +8,18 @@ var gameInterval = 500;
 var difficultyChange = 0;
 var isStaticGame = false;
 var lastInterval = gameInterval;
-var points = 0;
 var blop = new Audio("sounds/blop.mp3");
 var errorSound = new Audio("sounds/error.mp3");
-var subjectData = [];
-var cycleData = [];
-var roundData = [];
 var presses = [];
-var pressData = [];
+var rounds = [];
 var pressID = 0;
 var round = 0;
 var redsPosition = -1;
-var currentBlue = -1;
-var currentGreen = -1;
 var currentRed = -1;
 var roundStartTime = 0;
 var date = new Date();
 var subId;
-var gameCycleId;
+var cycleId;
 var groupId;
 var isGameTimeSet = false;
 
@@ -71,22 +65,18 @@ function game(isStaticGame, flashRedsintervals) {
 	
 	function flashBlue(nextCirclePosition) {
 		var nextcurrentRed = "#cellCircle" + nextCirclePosition;
-		currentBlue = nextcurrentRed;
 		switchColorBlue(nextcurrentRed);
 		setTimeout( function() { 
 			switchColorGray(nextcurrentRed); 
-			currentBlue = -1;
 		}, flashRedsintervals - 10);
 	}
 	
 	function flashDistractor(circlePosition) {
 		var rNumber = Math.floor(Math.random() * (10-1) + 1);
 		if(rNumber != circlePosition) {
-			currentGreen = "#cellCircle" + rNumber;
 			switchColorGreen("#cellCircle" + rNumber);
 			setTimeout(function() {
 				switchColorGray("#cellCircle" + rNumber);
-				currentGreen = -1;
 			}, flashRedsintervals - 10);
 		}
 	}
@@ -156,43 +146,51 @@ function average(array) {
 	return parseInt(sum/array.length);
 } 
 
-function getColor(id) {
-	if (id == currentBlue) {
-		return "blue";
-	} else if (id == currentGreen) {
-		return "green";
-	} else if (id == currentRed) {
-		return "red";
-	} else {
-		return "gray";
+function pushPressData(ev, presstype) {
+	press = {
+		pressId : pressID, 
+		buttonId : ev.target.id,
+		presstype : presstype,
+		Xcor : ev.pageX, 
+		Ycor : ev.pageY, 
+		behindCurrentRed : redsPosition - pressID,
+		pressTime : date.getTime() - roundStartTime
 	}
+	presses.push(press);
 }
 
-function pushPressData(ev) {
-	pressData.push(pressID);
-	pressData.push(ev.target.id);
-	pressData.push(ev.pageX);
-	pressData.push(ev.pageY);
-	pressData.push(redsPosition - pressID);
-	pressData.push(getColor(ev.target.id));
+function pushRoundData(isStatic) {
+	round = {
+		isStatic : isStatic,
+		roundNumber : round,
+		finalInterval : lastInterval, 
+		presses : presses, 
+		duration : date.getTime() - roundStartTime
+	}
+	rounds.push(round);
 }
 
-function pushRoundData() {
-	roundData.push(lastInterval);
-	roundData.push(presses);
-	roundData.push(date.getTime() - roundStartTime);
+function saveCycleData() {
+	cycleData = {
+		cycleId : cycleId,
+		subId : subId,
+		group : groupId,
+		rounds : rounds,		
+	}
+	localStorage.setItem(subId+" C" + cycleId, JSON.stringify(cycleData));
 }
 
 function clearCycle() {
 	stopGame = true;
 	stopCycle = true;
 	isStaticGame = false;
-	pushRoundData();
-	cycleData.push(roundData);
 	cycleData = [];
+	rounds = [];
 	round = 0;
 	nextPress = 0;
 	numberOfTestGames = 3;
+	gameInterval = 500;
+	lastInterval = 500;
 	isGameTimeSet = false;
 }
 
@@ -208,13 +206,7 @@ $(document).ready( function() {
 			round++;
 			presses = [];
 			pressId = 0;
-			roundData = [];
 			
-			if(isStaticGame) {
-				roundData.push("R" + round);
-			} else {
-				roundData.push("T" + round);
-			}
 			$("#pietimerArea").css("z-index", "-1");
 			$("#mask").css("z-index", "-1");
 			stopGame = false;
@@ -227,42 +219,48 @@ $(document).ready( function() {
 		function(ev) {
 			pressData = [];
 			pressID++;
-			pushPressData(ev);
 			if (ev.target.id == "cellCircle" + reds[nextPress - 1]){
-				presses.push(pressData);
-				pressData.push(0);
+				pushPressData(ev, "doubleclick");
 			} else if (ev.target.id != "cellCircle" + reds[nextPress]) {
-				presses.push(pressData);
-				pressData.push(2);
-				pushRoundData();
-				cycleData.push(roundData);
-				
+				pushPressData(ev, "miss");
 				nextPress = 0;
 				stopGame = true;
-				
+				pushRoundData(isStaticGame);
 				errorSound.play();
 				$("#pietimerArea").css("z-index", "1");
 				$("#mask").css("z-index", "1");
 				
 				stopGame = true;
-				if (numberOfTestGames > 0) {
+				if (numberOfTestGames > 1) {
 					testResults.push(lastInterval);
 					console.log(lastInterval);
 					lastInterval = gameInterval;
 					console.log("uusi nopeutuva peli");
 					$("#pietimerArea").pietimer("start");
 				} else {
+					if (isStaticGame == false) {
+						testResults.push(lastInterval);
+					}
 					console.log(testResults);
 					console.log("uusi tasainen peli");
 					isStaticGame = true;
-					gameInterval = average(testResults);
+					
+					if(groupId == 1) {
+						gameInterval = average(testResults);
+					} else if (groupId == 2) {
+						gameInterval = average(testResults) - 25;
+					} else if (groupId == 3) {
+						gameInterval = average(testResults) - 50;
+					}
+					
 					console.log(gameInterval);
 					
 					if (isGameTimeSet == false) {
 						isGameTimeSet = true;
 						setTimeout( function() {
+								saveCycleData();
 								clearCycle();
-								askGameCycleId();
+								askcycleId();
 						}, 1*60000);						
 					}
 
@@ -271,46 +269,45 @@ $(document).ready( function() {
 				numberOfTestGames--;
 			} else {
 				blop.play();
-				presses.push(pressData);
-				pressData.push(1);
-				points++;
-				$("#points").text(points);
+				pushPressData(ev, "hit");
 				lastInterval = changeInterval(lastInterval);
 				nextPress++;
 			}
 		}
 	)
 	
-	function askGameCycleId() {
-		gameCycleId = prompt("Anna monesko pelikierros", "");
-		switch(gameCycleId) {
+	$("#startbutton").click(
+		function(ev) {
+			$("#startbutton").css("z-index", "-2");
+			$("#pietimerArea").css("z-index", "1");
+			$("#pietimerArea").pietimer("start");
+		}		
+	)
+	
+	function askcycleId() {
+		cycleId = prompt("Monesko pelikierros?", "");
+		switch(cycleId) {
 			case "":
-				askGameCycleId();
+				askcycleId();
 				break;
 			default:
-				cycleData.push(gameCycleId);
 				stopCycle = false;
-				$("#pietimerArea").css("z-index", "-1");
-				$("#mask").css("z-index", "-1");
-//				$("#pietimerArea").pietimer("start");
+				$("#startbutton").css("z-index", "2");
 				break;
 		}
 	}
 	
 	function askgroupId() {
-		groupId = prompt("Anna ryhmäId", "");
+		groupId = prompt("Ryhmä", "");
 		switch(groupId) {
 			case "1":
-				subjectData.push(groupId);
-				askGameCycleId();
+				askcycleId();
 				break;
 			case "2":
-				subjectData.push(groupId);
-				askGameCycleId();
+				askcycleId();
 				break;
 			case "3":
-				subjectData.push(groupId);
-				askGameCycleId();	
+				askcycleId();	
 				break;
 			default:	
 				askgroupId();
@@ -324,8 +321,7 @@ $(document).ready( function() {
 			case "":
 				askSubId();
 				break;
-			default: 
-				subjectData.push(subId);
+			default:
 				askgroupId();
 				break;
 		}
