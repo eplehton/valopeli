@@ -20,11 +20,13 @@ var roundId = 0;
 var redsPosition = -1;
 var currentRed = -1;
 var roundStartTime = 0;
+var cycleStartTime = 0;
 var date = new Date();
 var subId;
 var cycleId;
 var groupId;
 var isGameTimeSet = false;
+var changeCycle = false;
 
 function game(isStaticGame, flashRedsintervals) {
 	
@@ -157,8 +159,8 @@ function pushPressData(ev, presstype) {
 		presstype : presstype,
 		Xcor : ev.pageX, 
 		Ycor : ev.pageY, 
-		behindCurrentRed : redsPosition - pressID,
-		pressTime : date.getTime() - roundStartTime
+		behindCurrentRed : numberOfRedsFlashed - numberOfRightPresses,
+		pressTime : (new Date()).getTime() - roundStartTime
 	}
 	presses.push(press);
 }
@@ -169,7 +171,7 @@ function pushRoundData(isStatic, success) {
 		successInStatic : success,
 		roundNumber : roundId,
 		finalInterval : lastInterval, 
-		duration : date.getTime() - roundStartTime,
+		duration : (new Date()).getTime() - roundStartTime,
 		presses : presses
 	}
 	rounds.push(round);
@@ -180,7 +182,8 @@ function saveCycleData() {
 		cycleId : cycleId,
 		subId : subId,
 		group : groupId,
-		rounds : rounds,		
+		duration : (new Date()).getTime() - cycleStartTime,
+		rounds : rounds		
 	}
 	localStorage.setItem(subId+" C" + cycleId, JSON.stringify(cycleData));
 }
@@ -198,6 +201,7 @@ function clearCycle() {
 	gameInterval = 500;
 	lastInterval = 500;
 	isGameTimeSet = false;
+	changeCycle = false;
 }
 
 $(document).ready( function() {
@@ -219,7 +223,8 @@ $(document).ready( function() {
 			if (isStaticGame) {
 				startGameTimer(15, 625);
 			}
-			roundStartTime = date.getTime;
+			roundStartTime = (new Date()).getTime();
+			console.log(roundStartTime);
 			numberOfRedsFlashed = 0;
 			numberOfRightPresses = 0;
 			game(isStaticGame, gameInterval);			
@@ -240,16 +245,18 @@ $(document).ready( function() {
 				if (numberOfTestGames > 1) {
 					newTestGame();
 				} else {
+					if (changeCycle == true) {
+						startNewCycle();
+						return;
+					}
 					$("#gameTimer").css("z-index", "0");
 					newStaticGame();
 					if (isGameTimeSet == false) {
 						isGameTimeSet = true;
 						setTimeout( function() {
-								saveCycleData();
-								clearCycle();
-								askcycleId();
-								$("#gameTimer").css("z-index", "-2");
-						}, 1*60000);						
+							changeCycle = true;
+							console.log("lastGame!");
+						}, 0.5*60000);						
 					}
 				}
 				numberOfTestGames--;
@@ -311,15 +318,25 @@ $(document).ready( function() {
 	
 	function waitForRightAmountOfPresses(amountOfPressesNeeded) {
 		if (stopGame == false) {
-			console.log(numberOfRightPresses + " " + amountOfPressesNeeded);
 			if(numberOfRightPresses >= amountOfPressesNeeded) {
 				fanfare.play();
 				endRound(true);
-				newStaticGame();
+				if (changeCycle == true) {
+					startNewCycle();
+				} else {
+					newStaticGame();
+				}
 			} else {
-				setTimeout(function() { waitForRightAmountOfPresses(amountOfPressesNeeded); }, 1);
+				setTimeout(function() { waitForRightAmountOfPresses(amountOfPressesNeeded); }, 5);
 			}			
 		}
+	}
+	
+	function startNewCycle() {
+		saveCycleData();
+		clearCycle();
+		$("#gameTimer").css("z-index", "-2");
+		askcycleId();
 	}
 	
 	$("#startbutton").click(
@@ -327,6 +344,7 @@ $(document).ready( function() {
 			stopCycle = false;
 			$("#startbutton").css("z-index", "-2");
 			$("#pietimerArea").css("z-index", "1");
+			cycleStartTime = (new Date()).getTime();
 			$("#pietimerArea").pietimer("start");
 		}		
 	)
