@@ -15,7 +15,28 @@
 	z-index: 1;
 }
 
-#cellCircle1, #cellCircle2, #cellCircle3, #cellCircle4, #cellCircle5, #cellCircle6, #cellCircle7, #cellCircle8, #cellCircle9 {
+#gameTimer {
+	background-color: green;
+	position: fixed;
+	left: 50%;
+	top: 50%;
+	width: 625px;
+	height: 55px;
+	margin-top: -410px;
+	background: -moz-linear-gradient(270deg, #039BA8 0%, #05C1FF 49%, #039BA8 100%); /* ff3.6+ */
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #039BA8), color-stop(49%, #05C1FF), color-stop(100%, #039BA8)); /* safari4+,chrome */
+	background: -webkit-linear-gradient(270deg, #039BA8 0%, #05C1FF 49%, #039BA8 100%); /* safari5.1+,chrome10+ */
+	background: -o-linear-gradient(270deg, #039BA8 0%, #05C1FF 49%, #039BA8 100%); /* opera 11.10+ */
+	background: -ms-linear-gradient(270deg, #039BA8 0%, #05C1FF 49%, #039BA8 100%); /* ie10+ */
+	background: linear-gradient(180deg, #039BA8 0%, #05C1FF 49%, #039BA8 100%); /* w3c */
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#039BA8', endColorstr='#039BA8',GradientType=0 ); /* ie6-9 */
+	-webkit-border-radius: 9;
+	-moz-border-radius: 9;
+	border-radius: 9px;
+	z-index: -2;
+}
+
+.circle, #cellCircle1, #cellCircle2, #cellCircle3, #cellCircle4, #cellCircle5, #cellCircle6, #cellCircle7, #cellCircle8, #cellCircle9 {
 	position: fixed;
 	left: 50%;
 	top: 50%;
@@ -69,12 +90,8 @@
 #whitemask {
 	background: white;
 	position: fixed;
-	left: 50%;
-	top: 85%;
-	margin-left: -95px;
-	margin-top: -30px;
-	width: 200px;
-	height: 60px;
+	width: 100%;
+	height: 100%;
 	z-index: -1;
 }
 

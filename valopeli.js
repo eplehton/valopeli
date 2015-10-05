@@ -6,14 +6,17 @@ var stopCycle = false;
 var numberOfTestGames = 3;
 var gameInterval = 500;
 var difficultyChange = 0;
+var numberOfRedsFlashed = 0;
+var numberOfRightPresses = 0;
 var isStaticGame = false;
 var lastInterval = gameInterval;
 var blop = new Audio("sounds/blop.mp3");
 var errorSound = new Audio("sounds/error.mp3");
+var fanfare = new Audio("sounds/fanfare.mp3");
 var presses = [];
 var rounds = [];
 var pressID = 0;
-var round = 0;
+var roundId = 0;
 var redsPosition = -1;
 var currentRed = -1;
 var roundStartTime = 0;
@@ -44,6 +47,7 @@ function game(isStaticGame, flashRedsintervals) {
 			var randomNumber = Math.floor(Math.random() * (100));
 			
 			switchColorRed(currentRed);
+			numberOfRedsFlashed += 1;
 			
 			if (position < reds.length - 1) {
 				redsPosition++;
@@ -159,13 +163,14 @@ function pushPressData(ev, presstype) {
 	presses.push(press);
 }
 
-function pushRoundData(isStatic) {
+function pushRoundData(isStatic, success) {
 	round = {
 		isStatic : isStatic,
-		roundNumber : round,
+		successInStatic : success,
+		roundNumber : roundId,
 		finalInterval : lastInterval, 
-		presses : presses, 
-		duration : date.getTime() - roundStartTime
+		duration : date.getTime() - roundStartTime,
+		presses : presses
 	}
 	rounds.push(round);
 }
@@ -186,7 +191,8 @@ function clearCycle() {
 	isStaticGame = false;
 	cycleData = [];
 	rounds = [];
-	round = 0;
+	testResults = [];
+	roundId = 0;
 	nextPress = 0;
 	numberOfTestGames = 3;
 	gameInterval = 500;
@@ -197,20 +203,25 @@ function clearCycle() {
 $(document).ready( function() {
 	
 	$("#pietimerArea").pietimer({
-	    seconds: 3,
+	    seconds: 1,
 		color: 'rgba(0, 0, 0, 0.8)',
 		height: 500,
 		width: 500	
 	}, function(){
 		if (stopCycle == false) {
-			round++;
+			roundId++;
 			presses = [];
 			pressId = 0;
 			
 			$("#pietimerArea").css("z-index", "-1");
 			$("#mask").css("z-index", "-1");
 			stopGame = false;
+			if (isStaticGame) {
+				startGameTimer(15, 625);
+			}
 			roundStartTime = date.getTime;
+			numberOfRedsFlashed = 0;
+			numberOfRightPresses = 0;
 			game(isStaticGame, gameInterval);			
 		}
 	});
@@ -223,51 +234,27 @@ $(document).ready( function() {
 				pushPressData(ev, "doubleclick");
 			} else if (ev.target.id != "cellCircle" + reds[nextPress]) {
 				pushPressData(ev, "miss");
-				nextPress = 0;
-				stopGame = true;
-				pushRoundData(isStaticGame);
 				errorSound.play();
-				$("#pietimerArea").css("z-index", "1");
-				$("#mask").css("z-index", "1");
+				endRound(false);
 				
-				stopGame = true;
 				if (numberOfTestGames > 1) {
-					testResults.push(lastInterval);
-					console.log(lastInterval);
-					lastInterval = gameInterval;
-					console.log("uusi nopeutuva peli");
-					$("#pietimerArea").pietimer("start");
+					newTestGame();
 				} else {
-					if (isStaticGame == false) {
-						testResults.push(lastInterval);
-					}
-					console.log(testResults);
-					console.log("uusi tasainen peli");
-					isStaticGame = true;
-					
-					if(groupId == 1) {
-						gameInterval = average(testResults);
-					} else if (groupId == 2) {
-						gameInterval = average(testResults) - 25;
-					} else if (groupId == 3) {
-						gameInterval = average(testResults) - 50;
-					}
-					
-					console.log(gameInterval);
-					
+					$("#gameTimer").css("z-index", "0");
+					newStaticGame();
 					if (isGameTimeSet == false) {
 						isGameTimeSet = true;
 						setTimeout( function() {
 								saveCycleData();
 								clearCycle();
 								askcycleId();
+								$("#gameTimer").css("z-index", "-2");
 						}, 1*60000);						
 					}
-
-					$("#pietimerArea").pietimer("start");
 				}
 				numberOfTestGames--;
 			} else {
+				numberOfRightPresses += 1;
 				blop.play();
 				pushPressData(ev, "hit");
 				lastInterval = changeInterval(lastInterval);
@@ -276,8 +263,68 @@ $(document).ready( function() {
 		}
 	)
 	
+	function endRound(staticGameSuccess) {
+		nextPress = 0;
+		stopGame = true;
+		pushRoundData(isStaticGame, staticGameSuccess);
+		$("#pietimerArea").css("z-index", "1");
+		$("#mask").css("z-index", "1");
+	}
+	
+	function newTestGame() {
+		testResults.push(lastInterval);
+		console.log(lastInterval);
+		lastInterval = gameInterval;
+		console.log("uusi nopeutuva peli");
+		$("#pietimerArea").pietimer("start");
+	}
+	
+	function newStaticGame() {
+		if (isStaticGame == false) {
+			testResults.push(lastInterval);
+		}
+		console.log(testResults);
+		console.log("uusi tasainen peli");
+		isStaticGame = true;
+					
+		if(groupId == 1) {
+		gameInterval = average(testResults);
+		} else if (groupId == 2) {
+			gameInterval = average(testResults) - 25;
+		} else if (groupId == 3) {
+			gameInterval = average(testResults) - 50;
+		}
+		console.log(gameInterval);
+		$("#pietimerArea").pietimer("start");
+	}
+	
+	function startGameTimer(sec, currentSize) {
+		if (stopGame == false) {
+			if (currentSize - 1 >= 0) {
+				$("#gameTimer").css("width", currentSize - 1 + "px");
+				setTimeout(function() { startGameTimer(sec, currentSize - 1); }, (sec*1000) / 625);
+			} else {
+				waitForRightAmountOfPresses(numberOfRedsFlashed);
+			}			
+		}
+	}
+	
+	function waitForRightAmountOfPresses(amountOfPressesNeeded) {
+		if (stopGame == false) {
+			console.log(numberOfRightPresses + " " + amountOfPressesNeeded);
+			if(numberOfRightPresses >= amountOfPressesNeeded) {
+				fanfare.play();
+				endRound(true);
+				newStaticGame();
+			} else {
+				setTimeout(function() { waitForRightAmountOfPresses(amountOfPressesNeeded); }, 1);
+			}			
+		}
+	}
+	
 	$("#startbutton").click(
 		function(ev) {
+			stopCycle = false;
 			$("#startbutton").css("z-index", "-2");
 			$("#pietimerArea").css("z-index", "1");
 			$("#pietimerArea").pietimer("start");
@@ -291,7 +338,6 @@ $(document).ready( function() {
 				askcycleId();
 				break;
 			default:
-				stopCycle = false;
 				$("#startbutton").css("z-index", "2");
 				break;
 		}
