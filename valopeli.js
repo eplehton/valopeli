@@ -207,7 +207,7 @@ function clearCycle() {
 $(document).ready( function() {
 	
 	$("#pietimerArea").pietimer({
-	    seconds: 1,
+	    seconds: 3,
 		color: 'rgba(0, 0, 0, 0.8)',
 		height: 500,
 		width: 500	
@@ -256,7 +256,7 @@ $(document).ready( function() {
 						setTimeout( function() {
 							changeCycle = true;
 							console.log("lastGame!");
-						}, 0.5*60000);						
+						}, 3*60000);						
 					}
 				}
 				numberOfTestGames--;
@@ -297,9 +297,15 @@ $(document).ready( function() {
 		if(groupId == 1) {
 		gameInterval = average(testResults);
 		} else if (groupId == 2) {
-			gameInterval = average(testResults) - 25;
+			gameInterval = average(testResults) - 10;
 		} else if (groupId == 3) {
-			gameInterval = average(testResults) - 50;
+			gameInterval = average(testResults) - 20;
+		} else if (groupId == 4) {
+			gameInterval = average(testResults) - 30;
+		} else if (groupId == 5) {
+			gameInterval = average(testResults) - 40;
+		} else if (groupId == 6) {
+			gameInterval = average(testResults) + 10;
 		}
 		console.log(gameInterval);
 		$("#pietimerArea").pietimer("start");
@@ -373,6 +379,15 @@ $(document).ready( function() {
 			case "3":
 				askcycleId();	
 				break;
+			case "4":
+				askcycleId();	
+				break;
+			case "5":
+				askcycleId();	
+				break;
+			case "6":
+				askcycleId();	
+				break;				
 			default:	
 				askgroupId();
 				break;	
