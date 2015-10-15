@@ -2,7 +2,7 @@ var reds = [];
 var nextPress = 0;
 var testResults = [];
 var stopGame = false;
-var stopCycle = false;
+var stopRound = false;
 var numberOfTestGames = 3;
 var gameInterval = 500;
 var difficultyChange = 0;
@@ -14,21 +14,21 @@ var blop = new Audio("sounds/blop.mp3");
 var errorSound = new Audio("sounds/error.mp3");
 var fanfare = new Audio("sounds/fanfare.mp3");
 var presses = [];
-var rounds = [];
+var games = [];
 var pressID = 0;
-var roundId = 0;
+var gameId = 0;
 var redsPosition = -1;
 var currentRed = -1;
+var gameStartTime = 0;
 var roundStartTime = 0;
-var cycleStartTime = 0;
 var date = new Date();
 var subId;
-var cycleId;
+var roundId;
 var groupId;
 var isGameTimeSet = false;
-var changeCycle = false;
+var changeRound = false;
 
-function game(isStaticGame, flashRedsintervals) {
+function startGame(isStaticGame, flashRedsintervals) {
 	
 	reds = []
 	for (var i=0; i<500; i++) {
@@ -160,60 +160,61 @@ function pushPressData(ev, presstype) {
 		Xcor : ev.pageX, 
 		Ycor : ev.pageY, 
 		behindCurrentRed : numberOfRedsFlashed - numberOfRightPresses,
-		pressTime : (new Date()).getTime() - roundStartTime
+		pressTime : (new Date()).getTime() - gameStartTime
 	}
 	presses.push(press);
 }
 
-function pushRoundData(isStatic, success) {
-	round = {
+function pushGameData(isStatic, success) {
+	game = {
 		isStatic : isStatic,
 		successInStatic : success,
-		roundNumber : roundId,
-		finalInterval : lastInterval, 
-		duration : (new Date()).getTime() - roundStartTime,
+		gameNumber : gameId,
+		finalInterval : lastInterval,
+		gameInterval : gameInterval,
+		duration : (new Date()).getTime() - gameStartTime,
 		presses : presses
 	}
-	rounds.push(round);
+	games.push(game);
 }
 
-function saveCycleData() {
-	cycleData = {
-		cycleId : cycleId,
+function saveRoundData() {
+	roundData = {
+		roundId : roundId,
 		subId : subId,
 		group : groupId,
-		duration : (new Date()).getTime() - cycleStartTime,
-		rounds : rounds		
+		duration : (new Date()).getTime() - roundStartTime,
+		games : games		
 	}
-	localStorage.setItem(subId+" C" + cycleId, JSON.stringify(cycleData));
+	localStorage.setItem(subId+"R" + roundId, JSON.stringify(roundData));
 }
 
-function clearCycle() {
+function clearRound() {
 	stopGame = true;
-	stopCycle = true;
+	stopRound = true;
 	isStaticGame = false;
-	cycleData = [];
-	rounds = [];
+	roundData = [];
+	games = [];
 	testResults = [];
-	roundId = 0;
+	gameId = 0;
 	nextPress = 0;
 	numberOfTestGames = 3;
 	gameInterval = 500;
 	lastInterval = 500;
 	isGameTimeSet = false;
-	changeCycle = false;
+	changeRound = false;
 }
 
 $(document).ready( function() {
 	
 	$("#pietimerArea").pietimer({
-	    seconds: 3,
+	    seconds: 1,
 		color: 'rgba(0, 0, 0, 0.8)',
 		height: 500,
 		width: 500	
 	}, function(){
-		if (stopCycle == false) {
-			roundId++;
+		if (stopRound == false) {
+			gameId++;
 			presses = [];
 			pressId = 0;
 			
@@ -223,11 +224,11 @@ $(document).ready( function() {
 			if (isStaticGame) {
 				startGameTimer(15, 625);
 			}
-			roundStartTime = (new Date()).getTime();
-			console.log(roundStartTime);
+			gameStartTime = (new Date()).getTime();
+			console.log(gameStartTime);
 			numberOfRedsFlashed = 0;
 			numberOfRightPresses = 0;
-			game(isStaticGame, gameInterval);			
+			startGame(isStaticGame, gameInterval);			
 		}
 	});
 	
@@ -240,13 +241,13 @@ $(document).ready( function() {
 			} else if (ev.target.id != "cellCircle" + reds[nextPress]) {
 				pushPressData(ev, "miss");
 				errorSound.play();
-				endRound(false);
+				endGame(false);
 				
 				if (numberOfTestGames > 1) {
 					newTestGame();
 				} else {
-					if (changeCycle == true) {
-						startNewCycle();
+					if (changeRound == true) {
+						startNewRound();
 						return;
 					}
 					$("#gameTimer").css("z-index", "0");
@@ -254,7 +255,7 @@ $(document).ready( function() {
 					if (isGameTimeSet == false) {
 						isGameTimeSet = true;
 						setTimeout( function() {
-							changeCycle = true;
+							changeRound = true;
 							console.log("lastGame!");
 						}, 3*60000);						
 					}
@@ -270,10 +271,10 @@ $(document).ready( function() {
 		}
 	)
 	
-	function endRound(staticGameSuccess) {
+	function endGame(staticGameSuccess) {
 		nextPress = 0;
 		stopGame = true;
-		pushRoundData(isStaticGame, staticGameSuccess);
+		pushGameData(isStaticGame, staticGameSuccess);
 		$("#pietimerArea").css("z-index", "1");
 		$("#mask").css("z-index", "1");
 	}
@@ -326,9 +327,9 @@ $(document).ready( function() {
 		if (stopGame == false) {
 			if(numberOfRightPresses >= amountOfPressesNeeded) {
 				fanfare.play();
-				endRound(true);
-				if (changeCycle == true) {
-					startNewCycle();
+				endGame(true);
+				if (changeRound == true) {
+					startNewRound();
 				} else {
 					newStaticGame();
 				}
@@ -338,28 +339,29 @@ $(document).ready( function() {
 		}
 	}
 	
-	function startNewCycle() {
-		saveCycleData();
-		clearCycle();
+	function startNewRound() {
+		saveRoundData();
+		clearRound();
 		$("#gameTimer").css("z-index", "-2");
-		askcycleId();
+		roundId++;
+		$("#startbutton").css("z-index", "2");
 	}
 	
 	$("#startbutton").click(
 		function(ev) {
-			stopCycle = false;
+			stopRound = false;
 			$("#startbutton").css("z-index", "-2");
 			$("#pietimerArea").css("z-index", "1");
-			cycleStartTime = (new Date()).getTime();
+			roundStartTime = (new Date()).getTime();
 			$("#pietimerArea").pietimer("start");
 		}		
 	)
 	
-	function askcycleId() {
-		cycleId = prompt("Monesko pelikierros?", "");
-		switch(cycleId) {
+	function askRoundId() {
+		roundId = prompt("Monesko pelikierros?", "");
+		switch(roundId) {
 			case "":
-				askcycleId();
+				askRoundId();
 				break;
 			default:
 				$("#startbutton").css("z-index", "2");
@@ -371,22 +373,22 @@ $(document).ready( function() {
 		groupId = prompt("Ryhmä", "");
 		switch(groupId) {
 			case "1":
-				askcycleId();
+				askRoundId();
 				break;
 			case "2":
-				askcycleId();
+				askRoundId();
 				break;
 			case "3":
-				askcycleId();	
+				askRoundId();	
 				break;
 			case "4":
-				askcycleId();	
+				askRoundId();	
 				break;
 			case "5":
-				askcycleId();	
+				askRoundId();	
 				break;
 			case "6":
-				askcycleId();	
+				askRoundId();	
 				break;				
 			default:	
 				askgroupId();

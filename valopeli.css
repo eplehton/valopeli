@@ -22,7 +22,7 @@
 	top: 50%;
 	width: 625px;
 	height: 55px;
-	margin-top: -410px;
+	margin-top: -200px;
 	background: -moz-linear-gradient(270deg, #039BA8 0%, #05C1FF 49%, #039BA8 100%); /* ff3.6+ */
 	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #039BA8), color-stop(49%, #05C1FF), color-stop(100%, #039BA8)); /* safari4+,chrome */
 	background: -webkit-linear-gradient(270deg, #039BA8 0%, #05C1FF 49%, #039BA8 100%); /* safari5.1+,chrome10+ */
@@ -67,16 +67,42 @@
 }
 
 .column1 {
-	margin-left: -320px;
-}
-
-.column2 {
-	margin-left: -100px;
+	margin-left: -540px;
 }
 
 .column3 {
+	margin-left: -320px;
+}
+
+.column5 {
+	margin-left: -100px;
+}
+
+.column7 {
 	margin-left: +120px;
 }
+
+.column9 {
+	margin-left: +340px;
+}
+
+.column2 {
+	margin-left: -430px;
+}
+
+.column4 {
+	margin-left: -210px;
+}
+
+.column6 {
+	margin-left: +10px;
+}
+
+.column8 {
+	margin-left: +230px;
+}
+
+
 
 #startbutton{
 	position: fixed;
