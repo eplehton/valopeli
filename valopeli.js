@@ -4,7 +4,7 @@ var testResults = [];
 var stopGame = false;
 var stopRound = false;
 var numberOfTestGames = 3;
-var gameInterval = 500;
+var gameInterval = 650;
 var difficultyChange = 0;
 var numberOfRedsFlashed = 0;
 var numberOfRightPresses = 0;
@@ -27,6 +27,8 @@ var roundId;
 var groupId;
 var isGameTimeSet = false;
 var changeRound = false;
+var gameSuccess = [];
+var isFirstStaticGame = true;
 
 function startGame(isStaticGame, flashRedsintervals) {
 	
@@ -149,7 +151,7 @@ function average(array) {
 	for(var i = 0; i < array.length; i++) {
 		sum += array[i];
 	}
-	return parseInt(sum/array.length);
+	return sum/array.length;
 } 
 
 function pushPressData(ev, presstype) {
@@ -205,6 +207,42 @@ function clearRound() {
 	changeRound = false;
 }
 
+function adaptInteval(amountOfOutcomes, previousInterval, epsilon) {
+	console.log("peli suoritukset: " + gameSuccess);
+	var outcomes = [];
+	if(gameSuccess.length > amountOfOutcomes) {
+		outcomes = gameSuccess.slice(gameSuccess.length - amountOfOutcomes - 1, gameSuccess.length - 1);
+	} else {
+		outcomes = gameSuccess;
+	}
+	var weightedOutcomes = weight(outcomes);
+	console.log("painotetut outcomit: " + weightedOutcomes);
+	var delta = average(weightedOutcomes);
+	console.log("delta: " + delta + " muutos: " + epsilon*delta);
+	console.log("uusi intervalli: " + (previousInterval + epsilon * delta));
+	return previousInterval + epsilon * delta;
+}
+
+function weight(array) {
+	weightedArray = []
+	for (var i = 0; i < array.length; i++) {
+		var weight = (i + 1) / array.length;
+		console.log("painokerroin: " + weight + " painotettava arvo: " + array[i] + " target arvo: " + getGroupsTargetP());
+		weightedArray.push(weight * (getGroupsTargetP() - array[i]))
+	}
+	return weightedArray;
+}
+
+function getGroupsTargetP() {
+	if (groupId == 1) {
+		return 0.5;
+	} else if (groupId == 2) {
+		return 0.25;
+	} else if (groupId == 3) {
+		return 0.95;
+	}
+}
+
 $(document).ready( function() {
 	
 	$("#pietimerArea").pietimer({
@@ -222,17 +260,16 @@ $(document).ready( function() {
 			$("#mask").css("z-index", "-1");
 			stopGame = false;
 			if (isStaticGame) {
-				startGameTimer(15, 625);
+				startGameTimer(10, 625);
 			}
 			gameStartTime = (new Date()).getTime();
-			console.log(gameStartTime);
 			numberOfRedsFlashed = 0;
 			numberOfRightPresses = 0;
 			startGame(isStaticGame, gameInterval);			
 		}
 	});
 	
-	$(".circle").click(
+	$(".circle").mousedown(
 		function(ev) {
 			pressData = [];
 			pressID++;
@@ -242,22 +279,25 @@ $(document).ready( function() {
 				pushPressData(ev, "miss");
 				errorSound.play();
 				endGame(false);
-				
+				if (isFirstStaticGame == false) {
+					gameSuccess.push(0);
+				}
 				if (numberOfTestGames > 1) {
 					newTestGame();
 				} else {
 					if (changeRound == true) {
 						startNewRound();
 						return;
-					}
-					$("#gameTimer").css("z-index", "0");
-					newStaticGame();
-					if (isGameTimeSet == false) {
-						isGameTimeSet = true;
-						setTimeout( function() {
-							changeRound = true;
-							console.log("lastGame!");
-						}, 3*60000);						
+					} else {
+						$("#gameTimer").css("z-index", "0");
+						newStaticGame();
+						if (isGameTimeSet == false) {
+							isGameTimeSet = true;
+							setTimeout( function() {
+								changeRound = true;
+								console.log("lastGame!");
+							}, 3*60000);						
+						}					
 					}
 				}
 				numberOfTestGames--;
@@ -294,19 +334,12 @@ $(document).ready( function() {
 		console.log(testResults);
 		console.log("uusi tasainen peli");
 		isStaticGame = true;
-					
-		if(groupId == 1) {
-		gameInterval = average(testResults);
-		} else if (groupId == 2) {
-			gameInterval = average(testResults) - 10;
-		} else if (groupId == 3) {
-			gameInterval = average(testResults) - 20;
-		} else if (groupId == 4) {
-			gameInterval = average(testResults) - 30;
-		} else if (groupId == 5) {
-			gameInterval = average(testResults) - 40;
-		} else if (groupId == 6) {
-			gameInterval = average(testResults) + 10;
+		
+		if(isFirstStaticGame) {
+			gameInterval = parseInt(average(testResults) + 30);
+			isFirstStaticGame = false;
+		} else {
+			gameInterval = parseInt(adaptInteval(10, gameInterval, 50));
 		}
 		console.log(gameInterval);
 		$("#pietimerArea").pietimer("start");
@@ -327,6 +360,7 @@ $(document).ready( function() {
 		if (stopGame == false) {
 			if(numberOfRightPresses >= amountOfPressesNeeded) {
 				fanfare.play();
+				gameSuccess.push(1);
 				endGame(true);
 				if (changeRound == true) {
 					startNewRound();
@@ -380,16 +414,7 @@ $(document).ready( function() {
 				break;
 			case "3":
 				askRoundId();	
-				break;
-			case "4":
-				askRoundId();	
-				break;
-			case "5":
-				askRoundId();	
-				break;
-			case "6":
-				askRoundId();	
-				break;				
+				break;	
 			default:	
 				askgroupId();
 				break;	
