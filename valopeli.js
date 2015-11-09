@@ -4,7 +4,7 @@ var testResults = [];
 var stopGame = false;
 var stopRound = false;
 var numberOfTestGames = 3;
-var gameInterval = 650;
+var gameInterval = 500;
 var difficultyChange = 0;
 var numberOfRedsFlashed = 0;
 var numberOfRightPresses = 0;
@@ -29,6 +29,7 @@ var isGameTimeSet = false;
 var changeRound = false;
 var gameSuccess = [];
 var isFirstStaticGame = true;
+var previousIntervalChange;
 
 function startGame(isStaticGame, flashRedsintervals) {
 	
@@ -174,6 +175,7 @@ function pushGameData(isStatic, success) {
 		gameNumber : gameId,
 		finalInterval : lastInterval,
 		gameInterval : gameInterval,
+		previousIntervalChange : previousIntervalChange,
 		duration : (new Date()).getTime() - gameStartTime,
 		presses : presses
 	}
@@ -205,13 +207,14 @@ function clearRound() {
 	lastInterval = 500;
 	isGameTimeSet = false;
 	changeRound = false;
+	isFirstStaticGame = true;
 }
 
 function adaptInteval(amountOfOutcomes, previousInterval, epsilon) {
 	console.log("peli suoritukset: " + gameSuccess);
 	var outcomes = [];
 	if(gameSuccess.length > amountOfOutcomes) {
-		outcomes = gameSuccess.slice(gameSuccess.length - amountOfOutcomes - 1, gameSuccess.length - 1);
+		outcomes = gameSuccess.slice(-1*amountOfOutcomes);
 	} else {
 		outcomes = gameSuccess;
 	}
@@ -220,6 +223,7 @@ function adaptInteval(amountOfOutcomes, previousInterval, epsilon) {
 	var delta = average(weightedOutcomes);
 	console.log("delta: " + delta + " muutos: " + epsilon*delta);
 	console.log("uusi intervalli: " + (previousInterval + epsilon * delta));
+	previousIntervalChange = previousInterval + epsilon * delta;
 	return previousInterval + epsilon * delta;
 }
 
@@ -246,7 +250,7 @@ function getGroupsTargetP() {
 $(document).ready( function() {
 	
 	$("#pietimerArea").pietimer({
-	    seconds: 1,
+	    seconds: 3,
 		color: 'rgba(0, 0, 0, 0.8)',
 		height: 500,
 		width: 500	
@@ -296,7 +300,7 @@ $(document).ready( function() {
 							setTimeout( function() {
 								changeRound = true;
 								console.log("lastGame!");
-							}, 3*60000);						
+							}, 4*60000);						
 						}					
 					}
 				}
@@ -336,8 +340,10 @@ $(document).ready( function() {
 		isStaticGame = true;
 		
 		if(isFirstStaticGame) {
-			gameInterval = parseInt(average(testResults) + 30);
 			isFirstStaticGame = false;
+			if(roundId == 1) {
+				gameInterval = parseInt(average(testResults) + 30);
+			}
 		} else {
 			gameInterval = parseInt(adaptInteval(10, gameInterval, 50));
 		}
