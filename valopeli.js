@@ -166,7 +166,7 @@ function pushPressData(ev, presstype) {
 		behindCurrentRed : numberOfRedsFlashed - numberOfRightPresses,
 		pressTime : (new Date()).getTime() - gameStartTime
 	}
-	//presses.push(press);
+	presses.push(press);
 }
 
 function pushGameData(isStatic, success) {
