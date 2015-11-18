@@ -445,5 +445,14 @@ $(document).ready( function() {
 		}
 	}
 	
+    $("#savebutton").click( function() {
+        
+        var data = localStorage.getItem("kh" + subId + "r" + roundId);
+        
+        var blob = new Blob([data], {type : "text/plain;charset=utf-8"});
+        saveAs(blob, "valopeli_tulokset.json");
+        
+    });
+    
 	askSubId();
 });
