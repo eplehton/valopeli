@@ -66,23 +66,23 @@ def rec2csv(rec, filename, replace_nan=None, **kwargs):
         f.close()
 
 
-with open('data/pilot2_c2.json') as f:
+with open('data/valopeli_tulokset_Pilot-JIR1.json') as f:
     
     
     data = json.load(f)
     
 
-    rounds = data['rounds']
+    games = data['games']
     
     round_table = {}
     
-    for r in rounds:
+    for g in games:
 
-        labels = ['roundNumber', 'finalInterval', 'successInStatic', 'isStatic']
+        labels = ['gameNumber', 'gameInterval', 'successInStatic', 'isStatic']
         for lab in labels:
             if not lab in round_table:
                 round_table[lab] = []
-            round_table[lab].append(r[lab])
+            round_table[lab].append(g[lab])
         #r2 = r.copy()
         #del r2['presses']
         #round_lst.append(r2)
