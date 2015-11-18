@@ -447,10 +447,11 @@ $(document).ready( function() {
 	
     $("#savebutton").click( function() {
         
-        var data = localStorage.getItem("kh" + subId + "r" + roundId);
+        var key = prompt("Anna datan avain");
+        var data = localStorage.getItem(key);
         
         var blob = new Blob([data], {type : "text/plain;charset=utf-8"});
-        saveAs(blob, "valopeli_tulokset.json");
+        saveAs(blob, "valopeli_tulokset_" + key +".json");
         
     });
     
