@@ -5,7 +5,7 @@ var stopGame = false;
 var stopRound = false;
 var numberOfTestGames = 3;
 var gameInterval = 0;
-var testGameStartInterval = 500;
+var testGameStartInterval = 600;
 var lastInterval = testGameStartInterval;
 var difficultyChange = 0;
 var numberOfRedsFlashed = 0;
@@ -31,6 +31,7 @@ var changeRound = false;
 var gameSuccess = [];
 var isFirstStaticGame = true;
 var previousIntervalChange;
+var rounds = [];
 
 function startGame(isStaticGame, flashRedsintervals) {
 	
@@ -97,10 +98,12 @@ function startGame(isStaticGame, flashRedsintervals) {
 function changeInterval(interval) {
 	if (interval < 200) {
 		return interval -= 1;
-	} else if (interval < 500){
+	} else if (interval < 350) {
 		return interval -= 2;
+	} else if (interval < 500){
+		return interval -= 4;
 	} else {
-		return interval -= 5;
+		return interval -= 6;
 	}
 }
 
@@ -186,12 +189,20 @@ function pushGameData(isStatic, success) {
 function saveRoundData() {
 	roundData = {
 		roundId : roundId,
-		subId : subId,
 		group : groupId,
 		duration : (new Date()).getTime() - roundStartTime,
 		games : games		
 	}
+	rounds.push(roundData);
 	localStorage.setItem(subId+"R" + roundId, JSON.stringify(roundData));
+}
+
+function saveSubData() {
+	subData = {
+		subId : subId,
+		rounds : rounds
+	}
+	localStorage.setItem(subId, JSON.stringify(roundData));
 }
 
 function clearRound() {
@@ -201,7 +212,6 @@ function clearRound() {
 	roundData = [];
 	games = [];
 	testResults = [];
-	gameId = 0;
 	nextPress = 0;
 	numberOfTestGames = 3;
 	lastInterval = 500;
@@ -302,7 +312,7 @@ $(document).ready( function() {
 							setTimeout( function() {
 								changeRound = true;
 								console.log("lastGame!");
-							}, 4*60000);						
+							}, 3*60000);						
 						}					
 					}
 				}
@@ -391,12 +401,14 @@ $(document).ready( function() {
 		$("#gameTimer").css("z-index", "-2");
 		roundId++;
 		$("#startbutton").css("z-index", "2");
+		$("#savebutton").css("z-index", "2");
 	}
 	
 	$("#startbutton").click(
 		function(ev) {
 			stopRound = false;
 			$("#startbutton").css("z-index", "-2");
+			$("#savebutton").css("z-index", "-2");
 			$("#pietimerArea").css("z-index", "1");
 			roundStartTime = (new Date()).getTime();
 			$("#pietimerArea").pietimer("start");
@@ -451,7 +463,7 @@ $(document).ready( function() {
         var data = localStorage.getItem(key);
         
         var blob = new Blob([data], {type : "text/plain;charset=utf-8"});
-        saveAs(blob, "valopeli_tulokset_" + key +".json");
+        saveAs(blob, "tulokset_" + key +".json");
         
     });
     

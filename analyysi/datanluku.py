@@ -8,6 +8,7 @@ Created on Thu Oct 15 13:18:52 2015
 
 import json
 import numpy as np
+subId = "ernoR3"
 
 def rec2csv(rec, filename, replace_nan=None, **kwargs):
     """
@@ -66,7 +67,7 @@ def rec2csv(rec, filename, replace_nan=None, **kwargs):
         f.close()
 
 
-with open('data/valopeli_tulokset_Pilot-JIR1.json') as f:
+with open('data/tulokset_' + subId + '.json') as f:
     
     
     data = json.load(f)
@@ -78,7 +79,7 @@ with open('data/valopeli_tulokset_Pilot-JIR1.json') as f:
     
     for g in games:
 
-        labels = ['gameNumber', 'gameInterval', 'successInStatic', 'isStatic']
+        labels = ['gameNumber', 'successInStatic', 'isStatic', 'gameInterval', 'finalInterval', 'previousIntervalChange']
         for lab in labels:
             if not lab in round_table:
                 round_table[lab] = []
@@ -96,6 +97,6 @@ with open('data/valopeli_tulokset_Pilot-JIR1.json') as f:
     print(table)
     
     #table.tofile('data/rounds.txt', sep=',')
-    rec2csv(table, 'data/rounds.txt', delimiter=',')
+    rec2csv(table, 'data/' + subId + '_data.txt', delimiter=',')
     
     
