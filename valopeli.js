@@ -30,8 +30,10 @@ var isGameTimeSet = false;
 var changeRound = false;
 var gameSuccess = [];
 var isFirstStaticGame = true;
-var previousIntervalChange;
+var previousIntervalChange = 0;
 var rounds = [];
+var experimentStartTime;
+var isExperimentStarted = false;
 
 function startGame(isStaticGame, flashRedsintervals) {
 	
@@ -200,6 +202,8 @@ function saveRoundData() {
 function saveSubData() {
 	subData = {
 		subId : subId,
+		experimentStartTime : experimentStartTime,
+		experimentDuration : new Date() - experimentStartTime,
 		rounds : rounds
 	}
 	localStorage.setItem(subId, JSON.stringify(roundData));
@@ -360,7 +364,7 @@ $(document).ready( function() {
 				gameInterval = parseInt(average(testResults) + 40);
 			}
 		} else {
-			gameInterval = parseInt(adaptInteval(10, gameInterval, 50));
+			gameInterval = parseInt(adaptInteval(20, gameInterval, 50));
 		}
 		isFirstStaticGame = false;
 		console.log(gameInterval);
@@ -397,6 +401,7 @@ $(document).ready( function() {
 	
 	function startNewRound() {
 		saveRoundData();
+		saveSubData();
 		clearRound();
 		$("#gameTimer").css("z-index", "-2");
 		roundId++;
@@ -406,6 +411,10 @@ $(document).ready( function() {
 	
 	$("#startbutton").click(
 		function(ev) {
+			if (isExperimentStarted == false) {
+				experimentStartTime = new Date();
+			}
+			isExperimentStarted = true;
 			stopRound = false;
 			$("#startbutton").css("z-index", "-2");
 			$("#savebutton").css("z-index", "-2");
