@@ -3,7 +3,7 @@
 library(ggplot2)
 library(psych)
 
-D <- read.table('data/Pilot-JP_data.txt', sep=',', header=T)
+D <- read.table('data/Pilot-IA_data.txt', sep=',', header=T)
 
 describeBy(D, group = D$isStatic)
 
