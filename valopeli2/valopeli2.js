@@ -37,6 +37,8 @@ var testGameIntervals = [];
 var testId = 1;
 var previousInterval = 400;
 var pressesToSuccess;
+var courseOfExperiment = [0, 1, 1, 1, 2, 0, 1, 1, 1, 2, 0, 1, 1, 1, 2, 0, 3]; //0 is test round, 1 is adaptive round, 2 is flow chart fill, 3 is the end of the  experiment
+var partOfExperiment = 0;
 }
 
 
@@ -357,7 +359,7 @@ $(document).ready( function() {
 						changeRound = true;
 						console.log("lastGame!");
 						numberOfAdaptedPlayed += 1;
-			}, 3*60000);
+			}, 0.5*60000);
 			startNewGame();
 		}		
 	)
@@ -390,7 +392,7 @@ $(document).ready( function() {
 // Starting the game with a timer
 
 	$("#pietimerArea").pietimer({
-	    seconds: 3,
+	    seconds: 0.5,
 		color: 'rgba(0, 0, 0, 0.8)',
 		height: 500,
 		width: 500	
@@ -453,9 +455,7 @@ $(document).ready( function() {
 			if (currentSize - 1 >= 0) {
 				$("#gameTimer").css("width", currentSize - 1 + "px");
 				setTimeout(function() 
-					{ startGameTimer(sec, currentSize - 1);}
-					
-					, (sec*1000) / 625);
+					{ startGameTimer(sec, currentSize - 1);}, (sec*1000) / 625);
 			} else {
 				waitForRightAmountOfPresses(numberOfRedsFlashed);
 			}			
@@ -481,7 +481,7 @@ $(document).ready( function() {
 		stopGame = true;
 		pushGameData(isTestGame, gameSuccess);
 		$("#pietimerArea").css("z-index", "1");
-		$("#mask").css("z-index", "1");		
+		$("#mask").css("z-index", "1");	
 		
 		if (isTestGame == true) {
 			numberOfTestGamesPlayed++;
@@ -507,11 +507,19 @@ $(document).ready( function() {
 //Round functions
 
 	function selectNextGameType() {
-		if (numberOfTestGamesPlayed % 9 == 0 && numberOfAdaptedPlayed == 0 || numberOfAdaptedPlayed % 3 != 0) {
-			isTestGame = false;
-		} else {
+		console.log("seuraavaksi osa: " + courseOfExperiment[partOfExperiment]);
+		if (courseOfExperiment[partOfExperiment] == 0) {
 			isTestGame = true;
-		}
+		} else if (courseOfExperiment[partOfExperiment] == 1){
+			isTestGame = false;
+		} else if (courseOfExperiment[partOfExperiment] == 2){
+			alert("Täytä kysely.");
+			partOfExperiment++;
+			selectNextGameType();
+		} else if (courseOfExperiment[partOfExperiment] == 3){
+			alert("Koe loppui!");
+		} 
+		
 	}
 	
 //End round
@@ -520,13 +528,11 @@ $(document).ready( function() {
 		saveRoundData(isTestGame);
 		saveSubData();
 		clearRound();
+		partOfExperiment++;
 		selectNextGameType();
 		$("#gameTimer").css("z-index", "-2");
 		roundId++;
 		$("#savebutton").css("z-index", "2");
-		if (numberOfTestsPlayed == 4) {
-			alert("Koe loppui!");
-		}
 		if (isTestGame == true) {
 			$("#testbutton").css("z-index", "2");
 		} else {
@@ -542,7 +548,6 @@ $(document).ready( function() {
 		$("#savebutton").css("z-index", "-2");
 		$("#pietimerArea").css("z-index", "1");
 	}
-
 
 //Starts experiment
 
