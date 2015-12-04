@@ -3,7 +3,7 @@
 library(ggplot2)
 library(psych)
 
-D <- read.table('data/Pilot-IA_data.txt', sep=',', header=T)
+D <- read.table('data/Pilot-JI_data.txt', sep=',', header=T)
 
 describeBy(D, group = D$isStatic)
 
@@ -17,11 +17,11 @@ ggplot(D, aes(x=gameNumber, y=gameInterval, colour=factor(isStatic))) +
 
 plot(D$gameNumber, D$finalInterval)
 
-ggplot(D, aes(gameNumber, y=finalInterval, colour=factor(isStatic))) +
+ggplot(D, aes(game, y=finalInterval, colour=factor(isStatic))) +
   geom_point() + 
+  stat_smooth(method="lm") +
   geom_line() +
-  theme_bw() 
-# + facet_grid(. ~ isStatic)
+  theme_bw() + facet_grid(. ~ isStatic)
 
 plot(D$gameNumber, D$successInStatic)
 
