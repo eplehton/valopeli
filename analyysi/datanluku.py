@@ -34,7 +34,7 @@ def rec2csv(rec, filename, replace_nan=None, **kwargs):
             fmt += "%d"
         elif np.issubdtype(np.float, t):
             fmt += "%.8f"
-        elif np.issubdtype(str, t):
+        elif np.issubdtype('S', t):
             fmt += "%s"
         else:
             print("data type not understood, will fail!", t)
@@ -67,36 +67,53 @@ def rec2csv(rec, filename, replace_nan=None, **kwargs):
         f.close()
 
 
-with open('data/tulokset_' + subId + '.json') as f:
+with open('data/tulokset_Pilot-ST.json') as f:
     
     
     data = json.load(f)
     
 
-    games = data['games']
+    rounds = data['rounds']
     
-    round_table = {}
-    
-    for g in games:
+    data_table = {}
 
-        labels = ['gameNumber', 'successInStatic', 'isStatic', 'gameInterval', 'finalInterval', 'previousIntervalChange']
-        for lab in labels:
-            if not lab in round_table:
-                round_table[lab] = []
-            round_table[lab].append(g[lab])
-        #r2 = r.copy()
-        #del r2['presses']
-        #round_lst.append(r2)
+    game_labels = ['isTestGame', 'successInStatic', 'gameNumber', 'gameInterval', 'previousIntervalChange', 'pressesToSuccess', 'duration']    
+    #  
+    labels = ['roundId', 'group']    
+    labels.extend(game_labels)
+
+    for lab in labels:
+        data_table[lab] = []    
+    
+    for r in rounds: 
         
+        round_id = int(r['roundId'])
+        group = int(r['group'])
+        
+        games = r['games']
+        
+        
+        for g in games:            
+            print(g)
+            for glab in game_labels:            
+                if not glab in g:
+                    val = 0
+                else:
+                    val = g[glab]
+                data_table[glab].append(val)
+                #data_table[glab].append(g[glab])
+            data_table['roundId'].append(round_id)
+            data_table['group'].append(group)
+            
         
     round_lst = []
     for val in labels:
-        round_lst.append(round_table[val])
+        round_lst.append(data_table[val])
     
     table = np.core.records.fromarrays(round_lst, names=labels)
     print(table)
+    print(table.dtype)
     
-    #table.tofile('data/rounds.txt', sep=',')
-    rec2csv(table, 'data/' + subId + '_data.txt', delimiter=',')
-    
+    #np.savetxt('data/rounds.txt', table)
+    rec2csv(table, 'data/rounds.txt', delimiter=',')
     
