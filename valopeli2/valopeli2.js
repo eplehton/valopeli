@@ -196,28 +196,12 @@ function switchColorGreen(id) {
 {//interval Handlers
 
 function generateTestIntervals() {
-	testGameIntervals.push(450);
-	testGameIntervals.push(450);
-	testGameIntervals.push(450);
-	testGameIntervals.push(375);
-	testGameIntervals.push(375);
-	testGameIntervals.push(375);
-	testGameIntervals.push(300);	
-	testGameIntervals.push(300);
-	testGameIntervals.push(300);
-//	var a = 0;
-//	var b = 0;
-//	var c = 0;
-//	while (testGameIntervals.length < 9) {
-//		var randomNumber = Math.floor(Math.random() * (3));
-//		if (randomNumber == 0 && a < 3) {
-//			testGameIntervals.push(450);
-//		} else if (randomNumber == 1 && b < 3) {
-//			testGameIntervals.push(375);
-//		} else if (randomNumber == 2 && c < 3) {
-//			testGameIntervals.push(300);
-//		}
+	testInterval = 450;
+	for (i = 0; i < 9; i++) {
+		testGameIntervals.push(testInterval);
+		testInterval -= 20;
 	}
+}
 }
 
 function adaptInteval(amountOfOutcomes, epsilon) {
