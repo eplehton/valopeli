@@ -8,7 +8,7 @@ Created on Thu Oct 15 13:18:52 2015
 
 import json
 import numpy as np
-subId = "erno"
+subId = "erno3"
 
 def rec2csv(rec, filename, replace_nan=None, **kwargs):
     """
@@ -67,7 +67,7 @@ def rec2csv(rec, filename, replace_nan=None, **kwargs):
         f.close()
 
 
-with open('data/tulokset_Pilot-ST.json') as f:
+with open('data/tulokset_' + subId + '.json') as f:
     
     
     data = json.load(f)
@@ -115,5 +115,5 @@ with open('data/tulokset_Pilot-ST.json') as f:
     print(table.dtype)
     
     #np.savetxt('data/rounds.txt', table)
-    rec2csv(table, 'data/rounds.txt', delimiter=',')
+    rec2csv(table, 'data/' + subId +  '_data.txt', delimiter=',')
     

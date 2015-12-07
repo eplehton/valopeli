@@ -39,6 +39,8 @@ var previousInterval = 400;
 var pressesToSuccess;
 var courseOfExperiment = [0, 1, 1, 1, 2, 0, 1, 1, 1, 2, 0, 1, 1, 1, 2, 0, 3]; //0 is test round, 1 is adaptive round, 2 is flow chart fill, 3 is the end of the  experiment
 var partOfExperiment = 0;
+var totalNumberOfPressesNeeded;
+var gameTime = 10;
 }
 
 
@@ -191,6 +193,13 @@ function switchColorGreen(id) {
 	circle.css("background", "radial-gradient(ellipse at center, #00FF00 0%, #00FF00 40%, #000000 100%)");
 	circle.css("filter", "progid:DXImageTransform.Microsoft.gradient( startColorstr='#00FF00', endColorstr='#000000',GradientType=1 )");
 }
+
+function switchAllGray() {
+	for(i = 1; i == 9; i++) {
+		cellId = "#cellCircle" + i;
+		switchColorGray("#cellCircle" + i);
+	}
+}
 }
 
 {//interval Handlers
@@ -204,7 +213,7 @@ function generateTestIntervals() {
 }
 }
 
-function adaptInteval(amountOfOutcomes, epsilon) {
+function adaptInterval(amountOfOutcomes, epsilon) {
 	console.log("peli suoritukset: " + adaptiveGameSuccess);
 	var outcomes = [];
 	if(adaptiveGameSuccess.length > amountOfOutcomes) {
@@ -212,9 +221,7 @@ function adaptInteval(amountOfOutcomes, epsilon) {
 	} else {
 		outcomes = adaptiveGameSuccess;
 	}
-	var weightedOutcomes = weight(outcomes);
-	console.log("painotetut outcomit: " + weightedOutcomes);
-	var delta = average(weightedOutcomes);
+	var delta = weightedAverage(outcomes);
 	console.log("delta: " + delta + " muutos: " + epsilon*delta);
 	console.log("uusi intervalli: " + (previousInterval + epsilon * delta));
 	previousIntervalChange = epsilon * delta;
@@ -261,6 +268,7 @@ function pushGameData(isTestGame, success) {
 		gameInterval : gameInterval,
 		previousIntervalChange : previousIntervalChange,
 		pressesToSuccess : pressesToSuccess,
+		totalNumberOfPressesNeeded : totalNumberOfPressesNeeded,
 		duration : (new Date()).getTime() - gameStartTime,
 		presses : presses
 	}
@@ -293,7 +301,6 @@ function saveSubData() {
 	}
 	localStorage.setItem(subId, JSON.stringify(subData));
 }
-
 }
 
 {//Tools
@@ -305,14 +312,14 @@ function average(array) {
 	return sum/array.length;
 } 
 
-function weight(array) {
-	weightedArray = []
+function weightedAverage(array) {
+	weightedArray = [];
 	for (var i = 0; i < array.length; i++) {
-		var weight = (i + 1) / array.length;
-		console.log("painokerroin: " + weight + " painotettava arvo: " + array[i] + " target arvo: " + getGroupsTargetP());
-		weightedArray.push(weight * (getGroupsTargetP() - array[i]))
+		weight = 2*(i+1)/array.length;
+		weightedArray.push(weight * (getGroupsTargetP() - array[i]));
 	}
-	return weightedArray;
+	console.log("weightedArray: " + weightedArray);
+	return average(weightedArray);
 }
 
 function getGroupsTargetP() {
@@ -343,7 +350,7 @@ $(document).ready( function() {
 						changeRound = true;
 						console.log("lastGame!");
 						numberOfAdaptedPlayed += 1;
-			}, 0.5*60000);
+			}, 3*60000);
 			startNewGame();
 		}		
 	)
@@ -376,7 +383,7 @@ $(document).ready( function() {
 // Starting the game with a timer
 
 	$("#pietimerArea").pietimer({
-	    seconds: 0.5,
+	    seconds: 3,
 		color: 'rgba(0, 0, 0, 0.8)',
 		height: 500,
 		width: 500	
@@ -398,14 +405,15 @@ $(document).ready( function() {
 			} else {
 				console.log("uusi harkka");
 				if (adaptiveGameSuccess.length > 0) {
-					gameInterval = adaptInteval(15, 50);
+					gameInterval = adaptInterval(15, 50);
 				} else {
 					gameInterval = previousInterval;
 				}
 			}
 			console.log("gameinterval: " + gameInterval);
 			$("#gameTimer").css("z-index", "0");
-			startGameTimer(10, 625);
+			totalNumberOfPressesNeeded = parseInt(gameTime*1000/gameInterval) + 1;
+			startGameTimer(gameTime, 625);
 			startGame(gameInterval);
 		}
 	});
@@ -421,7 +429,8 @@ $(document).ready( function() {
 			} else if (ev.target.id != "cellCircle" + reds[nextPress]) {//miss handler
 				pushPressData(ev, "miss");
 				errorSound.play();
-				pressesToSuccess = numberOfRedsFlashed - numberOfRightPresses;
+				pressesToSuccess = totalNumberOfPressesNeeded - numberOfRightPresses;
+				console.log("Kuinka paljon jai painamatta: " + pressesToSuccess);
 				endGame(false);
 			} else {//right click handler
 				numberOfRightPresses += 1;
@@ -441,19 +450,20 @@ $(document).ready( function() {
 				setTimeout(function() 
 					{ startGameTimer(sec, currentSize - 1);}, (sec*1000) / 625);
 			} else {
+				console.log("kuinka paljon välkkynyt: " + numberOfRedsFlashed+ " arvio: " + totalNumberOfPressesNeeded);
 				waitForRightAmountOfPresses(numberOfRedsFlashed);
 			}			
 		}
 	}
 	
-	function waitForRightAmountOfPresses(amountOfPressesNeeded) {
+	function waitForRightAmountOfPresses(pressesLeftToSuccess) {
 		if (stopGame == false) {
-			if(numberOfRightPresses >= amountOfPressesNeeded) {
+			if(numberOfRightPresses >= pressesLeftToSuccess) {
 				fanfare.play();
-				adaptiveGameSuccess.push(1);
+				pressesToSuccess = 0;
 				endGame(true);
 			} else {
-				setTimeout(function() { waitForRightAmountOfPresses(amountOfPressesNeeded); }, 5);
+				setTimeout(function() { waitForRightAmountOfPresses(pressesLeftToSuccess); }, 5);
 			}			
 		}
 	}
@@ -464,6 +474,7 @@ $(document).ready( function() {
 		nextPress = 0;
 		stopGame = true;
 		pushGameData(isTestGame, gameSuccess);
+		switchAllGray();
 		$("#pietimerArea").css("z-index", "1");
 		$("#mask").css("z-index", "1");	
 		
@@ -478,7 +489,11 @@ $(document).ready( function() {
 				endRound();
 			}
 		} else {
-			adaptiveGameSuccess.push(0);
+			if(gameSuccess == false) {
+				adaptiveGameSuccess.push(0);
+			} else {
+				adaptiveGameSuccess.push(1);
+			}
 			if (changeRound == true) {
 				endRound();
 			} else {
