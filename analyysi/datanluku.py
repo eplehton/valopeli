@@ -8,7 +8,7 @@ Created on Thu Oct 15 13:18:52 2015
 
 import json
 import numpy as np
-subId = "erno3"
+subId = "Pilot-TG"
 
 def rec2csv(rec, filename, replace_nan=None, **kwargs):
     """

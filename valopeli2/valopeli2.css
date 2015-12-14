@@ -131,6 +131,13 @@
 	z-index: 2;
 }
 
+#clearstoragebutton{
+	position: fixed;
+	left: 20px;
+	top: 50px;
+	z-index: 2;
+}
+
 #whitemask {
 	background: white;
 	position: fixed;

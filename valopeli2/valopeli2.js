@@ -206,7 +206,7 @@ function switchAllGray() {
 
 function generateTestIntervals() {
 	testInterval = 450;
-	for (i = 0; i < 9; i++) {
+	for (i = 0; i < 10; i++) {
 		testGameIntervals.push(testInterval);
 		testInterval -= 20;
 	}
@@ -267,6 +267,7 @@ function pushGameData(isTestGame, success) {
 		gameNumber : gameId,
 		gameInterval : gameInterval,
 		previousIntervalChange : previousIntervalChange,
+		totalPressesDone : numberOfRightPresses,
 		pressesToSuccess : pressesToSuccess,
 		totalNumberOfPressesNeeded : totalNumberOfPressesNeeded,
 		duration : (new Date()).getTime() - gameStartTime,
@@ -328,7 +329,7 @@ function getGroupsTargetP() {
 	} else if (groupId == 2) {
 		return 0.5;
 	} else if (groupId == 3) {
-		return 0.95;
+		return 0.90;
 	}
 }
 }
@@ -344,13 +345,24 @@ $(document).ready( function() {
         saveAs(blob, "tulokset_" + key +".json");
     });
 	
+	 $("#clearstoragebutton").click( function() {
+        var answer = prompt("Oletko varma? (k/e)");
+		switch(answer) {
+			case "k":
+				localStorage.clear();
+				break;
+			default:
+				break;
+		}
+    });
+	
 	$("#startbutton").click(
 		function(ev) {
 			setTimeout( function() {
 						changeRound = true;
 						console.log("lastGame!");
 						numberOfAdaptedPlayed += 1;
-			}, 3*60000);
+			}, 0.25*60000);
 			startNewGame();
 		}		
 	)
@@ -481,7 +493,7 @@ $(document).ready( function() {
 		if (isTestGame == true) {
 			numberOfTestGamesPlayed++;
 			console.log("test games played " + numberOfTestGamesPlayed);
-			if (numberOfTestGamesPlayed < 9) {
+			if (numberOfTestGamesPlayed < 10) {
 				startNewGame();
 			} else {
 				console.log("testi loppui");
@@ -532,6 +544,7 @@ $(document).ready( function() {
 		$("#gameTimer").css("z-index", "-2");
 		roundId++;
 		$("#savebutton").css("z-index", "2");
+		$("#clearstoragebutton").css("z-index", "2");
 		if (isTestGame == true) {
 			$("#testbutton").css("z-index", "2");
 		} else {
@@ -545,6 +558,7 @@ $(document).ready( function() {
 		$("#startbutton").css("z-index", "-2");
 		$("#testbutton").css("z-index", "-2");
 		$("#savebutton").css("z-index", "-2");
+		$("#clearstoragebutton").css("z-index", "-2");
 		$("#pietimerArea").css("z-index", "1");
 	}
 
