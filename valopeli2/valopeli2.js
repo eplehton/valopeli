@@ -206,7 +206,7 @@ function switchAllGray() {
 
 function generateTestIntervals() {
 	testInterval = 450;
-	for (i = 0; i < 10; i++) {
+	for (i = 0; i < 11; i++) {
 		testGameIntervals.push(testInterval);
 		testInterval -= 20;
 	}
@@ -362,7 +362,7 @@ $(document).ready( function() {
 						changeRound = true;
 						console.log("lastGame!");
 						numberOfAdaptedPlayed += 1;
-			}, 0.25*60000);
+			}, 3*60000);
 			startNewGame();
 		}		
 	)
@@ -493,7 +493,7 @@ $(document).ready( function() {
 		if (isTestGame == true) {
 			numberOfTestGamesPlayed++;
 			console.log("test games played " + numberOfTestGamesPlayed);
-			if (numberOfTestGamesPlayed < 10) {
+			if (numberOfTestGamesPlayed < 11) {
 				startNewGame();
 			} else {
 				console.log("testi loppui");
@@ -530,7 +530,6 @@ $(document).ready( function() {
 		} else if (courseOfExperiment[partOfExperiment] == 3){
 			alert("Koe loppui!");
 		} 
-		
 	}
 	
 //End round
