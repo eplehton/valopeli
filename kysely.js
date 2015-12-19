@@ -1,4 +1,5 @@
 var subId = "";
+var group = "";
 
 $(document).ready( function() {
 	
@@ -25,27 +26,39 @@ $(document).ready( function() {
 	
 	$("#flowKyselyNappi1").click(
 		function(ev) {
-			var url = 'https://docs.google.com/forms/d/1gVjC6nUBwu25tyuFJkXAq2NSL-iBkPD30GWPw-OTwDw/viewform?entry.1626504697=' + subId + '&entry.659074400=' + '1';
+			var url = 'https://docs.google.com/forms/d/1gVjC6nUBwu25tyuFJkXAq2NSL-iBkPD30GWPw-OTwDw/viewform?entry.1626504697=' + subId + '&entry.940710790=' + group + '&entry.659074400=' + '1';
 			window.open(url);
 		}
 	)
 	
 	$("#flowKyselyNappi2").click(
 		function(ev) {
-			var url = 'https://docs.google.com/forms/d/1gVjC6nUBwu25tyuFJkXAq2NSL-iBkPD30GWPw-OTwDw/viewform?entry.1626504697=' + subId + '&entry.659074400=' + '2';
+			var url = 'https://docs.google.com/forms/d/1gVjC6nUBwu25tyuFJkXAq2NSL-iBkPD30GWPw-OTwDw/viewform?entry.1626504697=' + subId + '&entry.940710790=' + group + '&entry.659074400=' + '2';
 			window.open(url);
 		}
 	)
 	
 	$("#flowKyselyNappi3").click(
 		function(ev) {
-			var url = 'https://docs.google.com/forms/d/1gVjC6nUBwu25tyuFJkXAq2NSL-iBkPD30GWPw-OTwDw/viewform?entry.1626504697=' + subId + '&entry.659074400=' + '3';
+			var url = 'https://docs.google.com/forms/d/1gVjC6nUBwu25tyuFJkXAq2NSL-iBkPD30GWPw-OTwDw/viewform?entry.1626504697=' + subId + '&entry.940710790=' + group + '&entry.659074400=' + '3';
 			window.open(url);
 		}
 	)
 	
 	function askSubId() {
 		subId = prompt("KH ID", "");
+		switch(subId) {
+			case "":
+				askSubId();
+				break;
+			default:
+			askGroup();
+				break;
+		}
+	}
+	
+		function askGroup() {
+		group = prompt("Ryhma", "");
 		switch(subId) {
 			case "":
 				askSubId();
