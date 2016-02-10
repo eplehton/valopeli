@@ -1,0 +1,1 @@
+roundId,group,isTestGame,successInStatic,gameNumber,gameInterval,previousIntervalChange,pressesToSuccess,duration

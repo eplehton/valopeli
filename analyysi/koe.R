@@ -1,13 +1,43 @@
-
-
+library(plyr)
 library(ggplot2)
 library(psych)
 
-D <- read.table('data/Pilot-TG_data.txt', sep=',', header=T)
+D <- read.table('data/datat.txt', sep=',', header=T)
 
 describeBy(D, group = D$isTestGame)
 
 plot(D$gameNumber, D$gameInterval)
+
+
+success <- ddply(D, .(subId, roundId, isTestGame), summarise,
+                    SIS = mean(successInStatic),
+                    PTS = mean(pressesToSuccess))
+
+ggplot(success, aes(x=roundId, y=SIS, colour=subId)) + 
+  geom_point() +
+  geom_line() +
+  facet_grid(isTestGame ~ .)
+
+ggplot(success, aes(x=roundId, y=PTS, colour=subId)) + 
+  geom_point() +
+  geom_line() +
+  facet_grid(isTestGame ~ .)
+
+
+success.group <- ddply(D, .(group, roundId, isTestGame), summarise,
+                 SIS = mean(successInStatic),
+                 PTS = mean(pressesToSuccess))
+
+ggplot(success.group, aes(x=roundId, y=SIS, colour=factor(group))) + 
+  geom_point() +
+  geom_line() +
+  facet_grid(isTestGame ~ .)
+
+ggplot(success.group, aes(x=roundId, y=PTS, colour=factor(group))) + 
+  geom_point() +
+  geom_line() +
+  facet_grid(isTestGame ~ .)
+
 
 ggplot(D, aes(x=gameNumber, y=gameInterval, colour=factor(isTestGame))) +
   geom_point() + 

@@ -8,7 +8,7 @@ Created on Thu Oct 15 13:18:52 2015
 
 import json
 import numpy as np
-subId = "Pilot-TG"
+
 
 def rec2csv(rec, filename, replace_nan=None, **kwargs):
     """
@@ -36,6 +36,8 @@ def rec2csv(rec, filename, replace_nan=None, **kwargs):
             fmt += "%.8f"
         elif np.issubdtype('S', t):
             fmt += "%s"
+        elif np.issubdtype('U', t):
+            fmt += "%U"
         else:
             print("data type not understood, will fail!", t)
 
@@ -67,19 +69,24 @@ def rec2csv(rec, filename, replace_nan=None, **kwargs):
         f.close()
 
 
-with open('data/tulokset_' + subId + '.json') as f:
+import sys
+
+
+subId = sys.argv[1]
+
+with open('tulokset_' + subId + '.json') as f:
     
     
     data = json.load(f)
     
-
+    sub_id = "{0}".format(data['subId'])
     rounds = data['rounds']
     
     data_table = {}
 
     game_labels = ['isTestGame', 'successInStatic', 'gameNumber', 'gameInterval', 'previousIntervalChange', 'pressesToSuccess', 'duration']    
-    #  
-    labels = ['roundId', 'group']    
+    
+    labels = ['subId', 'roundId', 'group']    
     labels.extend(game_labels)
 
     for lab in labels:
@@ -102,6 +109,7 @@ with open('data/tulokset_' + subId + '.json') as f:
                     val = g[glab]
                 data_table[glab].append(val)
                 #data_table[glab].append(g[glab])
+            data_table['subId'].append(sub_id)
             data_table['roundId'].append(round_id)
             data_table['group'].append(group)
             
@@ -115,5 +123,5 @@ with open('data/tulokset_' + subId + '.json') as f:
     print(table.dtype)
     
     #np.savetxt('data/rounds.txt', table)
-    rec2csv(table, 'data/' + subId +  '_data.txt', delimiter=',')
+    rec2csv(table, subId +  '_data.txt', delimiter=',')
     
