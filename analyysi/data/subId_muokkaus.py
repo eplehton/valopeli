@@ -7,7 +7,7 @@ Created on Tue Feb 16 16:03:05 2016
 
 import json
 
-n = '25'
+n = '29'
 
 with open('tulokset_KH' + n + '.json', 'r') as f:
     json_data = json.load(f)
@@ -15,3 +15,6 @@ with open('tulokset_KH' + n + '.json', 'r') as f:
     
 with open('tulokset_KH' + n + '.json', 'w') as f:
     f.write(json.dumps(json_data))
+    
+    
+
