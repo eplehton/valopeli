@@ -8,7 +8,7 @@ describeBy(D, group = D$isTestGame)
 
 
 
-success <- ddply(D, .(subId, roundId, isTestGame), summarise,
+success <- ddply(D, .(group, subId, roundId, isTestGame), summarise,
                     SIS = mean(successInStatic),
                     PTS = mean(pressesToSuccess),
                     Inter = mean(gameInterval),
@@ -29,7 +29,22 @@ describeBy(success, group = success$subId)
 ggplot(success, aes(x=roundId, y=SIS, colour=subId)) + 
   geom_point() +
   geom_line() +
-  facet_grid(isTestGame ~ ., scales = "free")
+  facet_grid(isTestGame ~ group, scales = "free")
+
+success.tests <- success[ success$isTestGame == 1,]
+ggplot(success.tests, aes(x=roundId, y=SIS, colour=subId)) + 
+  geom_point() +
+  geom_line() +
+  facet_grid(. ~ group, scales = "free")
+
+success.tests$roundFact <- ordered(success.tests$roundId)
+success.tests$groupFact <- factor(success.tests$group)
+
+fm <- lm(SIS ~ roundFact * groupFact, data=success.tests)
+summary(fm)
+options("contrasts"=c("contr.sum", "contr.poly"))
+library(car)
+Anova(fm, type=3)
 
 ggplot(success, aes(x=roundId, y=PTS, colour=subId)) + 
   geom_point() +
@@ -49,6 +64,12 @@ ggplot(success.group, aes(x=roundId, y=SIS, colour=factor(group))) +
   geom_point() +
   geom_line() +
   facet_grid(isTestGame ~ ., scales = "free")
+
+ggplot(success.group, aes(x=roundId, y=SIS, colour=factor(group))) + 
+  geom_point() +
+  geom_line() +
+  facet_grid(isTestGame ~ ., scales = "free")
+
 
 ggplot(success.group, aes(x=roundId, y=PTS, colour=factor(group))) + 
   geom_point() +
@@ -85,7 +106,12 @@ onlySuccess.group.MMI <- ddply(onlySuccess, .(group, roundId, isTestGame), summa
 ggplot(onlySuccess, aes(x=roundId, y=MI, colour=factor(subId))) + 
   geom_point() +
   geom_line() +
+  facet_grid(isTestGame ~ group, scales = "free")
+
+ggplot(onlySuccess, aes(x=factor(group), y=MI)) + 
+  geom_boxplot() +
   facet_grid(isTestGame ~ ., scales = "free")
+
 
 #Succesful interval means per subject
 
