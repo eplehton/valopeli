@@ -21,6 +21,10 @@ success.group <- ddply(D, .(group, roundId, isTestGame), summarise,
                        Inter = mean(gameInterval),
                        PIC = mean(previousIntervalChange)) 
 
+#mixed design anova
+
+
+
 
 #individual success
 
@@ -64,12 +68,6 @@ ggplot(success.group, aes(x=roundId, y=SIS, colour=factor(group))) +
   geom_point() +
   geom_line() +
   facet_grid(isTestGame ~ ., scales = "free")
-
-ggplot(success.group, aes(x=roundId, y=SIS, colour=factor(group))) + 
-  geom_point() +
-  geom_line() +
-  facet_grid(isTestGame ~ ., scales = "free")
-
 
 ggplot(success.group, aes(x=roundId, y=PTS, colour=factor(group))) + 
   geom_point() +

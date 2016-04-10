@@ -7,7 +7,7 @@ Created on Tue Feb 16 16:03:05 2016
 
 import json
 
-n = '29'
+n = '34'
 
 with open('tulokset_KH' + n + '.json', 'r') as f:
     json_data = json.load(f)
