@@ -2,208 +2,205 @@ library(plyr)
 library(ggplot2)
 library(psych)
 
-answersData <- read.table('kysely.txt', sep='\t', header=T)
+ans <- read.table('kysely/kyselyt.txt', sep='\t', header=T)
 
-ans.roundmeans <- ddply(answersData, .(group, subId), summarise,
-                 mf01 = mean(f01),
-                 mf02 = mean(f02),
-                 mf03 = mean(f03),
-                 mf04 = mean(f04),
-                 mf05 = mean(f05),
-                 mf06 = mean(f06),
-                 mf07 = mean(f07),
-                 mf08 = mean(f08),
-                 mf09 = mean(f09),
-                 mf10 = mean(f10),
-                 mf11 = mean(f11),
-                 mf12 = mean(f12),
-                 mf13 = mean(f13),
-                 mm01 = mean(m01),
-                 mm02 = mean(m02),
-                 mm03 = mean(m03),
-                 mvirkeys = mean(virkeys),
-                 mflow10 = mean(mf01, mf02, mf03, mf04, mf05, mf06, mf07, mf08, mf09, mf10),
-                 motiv3 = mean(mm01, mm02, mm03)
+attach(ans)
+ans$f11rec7[f11 == 1] <- 1
+ans$f11rec7[f11 == 2] <- 2.5
+ans$f11rec7[f11 == 3] <- 4
+ans$f11rec7[f11 == 4] <- 5.5
+ans$f11rec7[f11 == 5] <- 7
+ans$f11rec7[f11 == 6] <- 5.5
+ans$f11rec7[f11 == 7] <- 4
+ans$f11rec7[f11 == 8] <- 2.5
+ans$f11rec7[f11 == 9] <- 1
+detach(ans)
 
-ans.group.roundmeans <- ddply(ans.roundmeans, .(group), summarise,
-                     gmf01 = mean(mf01),
-                     gmf02 = mean(mf02),
-                     gmf03 = mean(mf03),
-                     gmf04 = mean(mf04),
-                     gmf05 = mean(mf05),
-                     gmf06 = mean(mf06),
-                     gmf07 = mean(mf07),
-                     gmf08 = mean(mf08),
-                     gmf09 = mean(mf09),
-                     gmf10 = mean(mf10),
-                     gmf11 = mean(mf11),
-                     gmf12 = mean(mf12),
-                     gmf13 = mean(mf13),
-                     gmm01 = mean(mm01),
-                     gmm02 = mean(mm02),
-                     gmm03 = mean(mm03),
-                     gmvirkeys = mean(mvirkeys),
-                     gmflow10 = mean(gmf01, gmf02, gmf03, gmf04, gmf05, gmf06, gmf07, gmf08, gmf09, gmf10))
+attach(ans)
+ans$f12rec7[f12 == 1] <- 1
+ans$f12rec7[f12 == 2] <- 2.5
+ans$f12rec7[f12 == 3] <- 4
+ans$f12rec7[f12 == 4] <- 5.5
+ans$f12rec7[f12 == 5] <- 7
+ans$f12rec7[f12 == 6] <- 5.5
+ans$f12rec7[f12 == 7] <- 4
+ans$f12rec7[f12 == 8] <- 2.5
+ans$f12rec7[f12 == 9] <- 1
+detach(ans)
 
-ans.group <- ddply(answersData, .(group, kierros), summarise,
-                     rmf01 = mean(f01),
-                     rmf02 = mean(f02),
-                     rmf03 = mean(f03),
-                     rmf04 = mean(f04),
-                     rmf05 = mean(f05),
-                     rmf06 = mean(f06),
-                     rmf07 = mean(f07),
-                     rmf08 = mean(f08),
-                     rmf09 = mean(f09),
-                     rmf10 = mean(f10),
-                     flow10 = mean(rmf01, rmf02, rmf03, rmf04, rmf05, rmf06, rmf07, rmf08, rmf09, rmf10),
-                     rmm01 = mean(m01),
-                     rmm02 = mean(m02),
-                     rmm03 = mean(m03),
-                     rmvirkeys = mean(virkeys))
+attach(ans)
+ans$f13rec7[f13 == 1] <- 1
+ans$f13rec7[f13 == 2] <- 2.5
+ans$f13rec7[f13 == 3] <- 4
+ans$f13rec7[f13 == 4] <- 5.5
+ans$f13rec7[f13 == 5] <- 7
+ans$f13rec7[f13 == 6] <- 5.5
+ans$f13rec7[f13 == 7] <- 4
+ans$f13rec7[f13 == 8] <- 2.5
+ans$f13rec7[f13 == 9] <- 1
+detach(ans)
+
+ans <- transform( ans,
+                  flow10 = (f01 + f02 + f03 + f04 + f05 + f06 + f07 + f08 + f09 + f10)/10,
+                  flow13 = (f01 + f02 + f03 + f04 + f05 + f06 + f07 + f08 + f09 + f10 + f11rec7 + f12rec7 + f13rec7)/13,
+                  flow3 = (f11 + f12 + f13)/3,
+                  motiv3 = (m01 + m02 + m03)/3,
+                  difficulty = (f01 + f13rec7)/2
+)
+
+
+ans.roundmeans <- ddply (ans, .(group, subId), summarise,
+                 f01 = mean(f01),
+                 f02 = mean(f02),
+                 f03 = mean(f03),
+                 f04 = mean(f04),
+                 f05 = mean(f05),
+                 f06 = mean(f06),
+                 f07 = mean(f07),
+                 f08 = mean(f08),
+                 f09 = mean(f09),
+                 f10 = mean(f10),
+                 f11 = mean(f11),
+                 f12 = mean(f12),
+                 f13 = mean(f13),
+                 f11rec7 = mean (f11rec7),
+                 f12rec7 = mean (f12rec7),
+                 f13rec7 = mean (f13rec7),
+                 m01 = mean(m01),
+                 m02 = mean(m02),
+                 m03 = mean(m03),
+                 virkeys = mean(virkeys),
+                 flow10 = mean(flow10),
+                 flow13 = mean(flow13),
+                 flow3 = mean(flow3),
+                 motiv3 = mean(motiv3),
+                 difficulty = mean(difficulty),
+                 age = mean(age),
+                 sex = mean(sex1n0m),
+                 hand = mean(handedness1o0v),
+                 playtime = mean(playtime),
+                 gamespeed = mean(gamespeed),
+                 game_exp = mean(game_exp),
+                 liking = mean(liking),
+                 skill = mean(skill)
+)
+
+ans.roundmeans.group <- ddply(ans.roundmeans, .(group), summarise,
+                              f01 = mean(f01),
+                              f02 = mean(f02),
+                              f03 = mean(f03),
+                              f04 = mean(f04),
+                              f05 = mean(f05),
+                              f06 = mean(f06),
+                              f07 = mean(f07),
+                              f08 = mean(f08),
+                              f09 = mean(f09),
+                              f10 = mean(f10),
+                              f11 = mean(f11),
+                              f12 = mean(f12),
+                              f13 = mean(f13),
+                              f11rec7 = mean (f11rec7),
+                              f12rec7 = mean (f12rec7),
+                              f13rec7 = mean (f13rec7),
+                              m01 = mean(m01),
+                              m02 = mean(m02),
+                              m03 = mean(m03),
+                              virkeys = mean(virkeys),
+                              flow10 = mean(flow10),
+                              flow13 = mean(flow13),
+                              flow3 = mean(flow3),
+                              motiv3 = mean(motiv3),
+                              difficulty = mean(difficulty),
+                              age = mean(age),
+                              sex = mean(sex),
+                              hand = mean(hand),
+                              playtime = mean(playtime),
+                              gamespeed = mean(gamespeed),
+                              game_exp = mean(game_exp),
+                              liking = mean(liking),
+                              skill = mean(skill)
+)
+
+ans.group <- ddply(ans, .(group, kierros), summarise,
+                   f01 = mean(f01),
+                   f02 = mean(f02),
+                   f03 = mean(f03),
+                   f04 = mean(f04),
+                   f05 = mean(f05),
+                   f06 = mean(f06),
+                   f07 = mean(f07),
+                   f08 = mean(f08),
+                   f09 = mean(f09),
+                   f10 = mean(f10),
+                   f11 = mean(f11),
+                   f12 = mean(f12),
+                   f13 = mean(f13),
+                   f11rec7 = mean (f11rec7),
+                   f12rec7 = mean (f12rec7),
+                   f13rec7 = mean (f13rec7),
+                   m01 = mean(m01),
+                   m02 = mean(m02),
+                   m03 = mean(m03),
+                   virkeys = mean(virkeys),
+                   flow10 = mean(flow10),
+                   flow13 = mean(flow13),
+                   flow3 = mean(flow3),
+                   motiv3 = mean(motiv3),
+                   difficulty = mean(difficulty),
+                   age = mean(age),
+                   sex = mean(sex1n0m),
+                   hand = mean(handedness1o0v),
+                   playtime = mean(playtime),
+                   gamespeed = mean(gamespeed),
+                   game_exp = mean(game_exp),
+                   liking = mean(liking),
+                   skill = mean(skill)
+)
+
+# multiple regression
+
+flowproduced <- lm(flow13 ~ group + sex + age + game_exp + liking + skill, data = ans.roundmeans)
+summary(flowproduced)
+
+#anova
+
+flowmodel <- aov(flow13 ~ group, data = ans.roundmeans)
+summary(flowmodel)
+plot(flowmodel)
+
+by(ans$flow13, list(ans$kierros, ans$group), stat.desc, basic = FALSE)
+
+
+# graphs
 
 ggplot(ans.group, aes(x=kierros, y=flow10, colour=factor(group))) + 
   geom_point() +
   geom_line()
-  
-ggplot(ans.group.roundmeans, aes(x=group, y=gmflow10)) + 
-  geom_point() + 
+
+ggplot(ans.group, aes(x=kierros, y=flow13, colour=factor(group))) + 
+  geom_point() +
+  geom_line()
+
+ggplot(ans.group, aes(x=kierros, y=flow3, colour=factor(group))) + 
+  geom_point() +
   geom_line()
 
 
-
-
-
-
-
-
-
-
-
-#group ans per questions
-
-ggplot(ans.group.roundmeans, aes(x=group, y=gmf01)) + 
+ggplot(ans.roundmeans, aes(x=factor(group), y=flow10)) + 
   geom_point() + 
-  geom_line()
+  geom_boxplot()
 
-ggplot(ans.group.roundmeans, aes(x=group, y=gmf02)) + 
-  geom_point() 
 
-ggplot(ans.group.roundmeans, aes(x=group, y=gmf03)) + 
-  geom_point()
+ggplot(ans.roundmeans, aes(x=factor(group), y=flow13)) + 
+  geom_point() + 
+  geom_boxplot()
 
-ggplot(ans.group.roundmeans, aes(x=group, y=gmf04)) + 
-  geom_point()
 
-ggplot(ans.group.roundmeans, aes(x=group, y=gmf05)) + 
-  geom_point() 
+ggplot(ans.roundmeans, aes(x=factor(group), y=flow3)) + 
+  geom_point() + 
+  geom_boxplot()
 
-ggplot(ans.group.roundmeans, aes(x=group, y=gmf06)) + 
-  geom_point() +
-  geom_jitter()
-
-ggplot(ans.group.roundmeans, aes(x=group, y=gmf07)) + 
-  geom_point()
-
-ggplot(ans.group.roundmeans, aes(x=group, y=gmf08)) + 
-  geom_point() +
-  geom_jitter()
-
-ggplot(ans.group.roundmeans, aes(x=group, y=gmf09)) + 
-  geom_point() 
-
-ggplot(ans.group.roundmeans, aes(x=group, y=gmf10)) + 
-  geom_point()
-
-ggplot(ans.group.roundmeans, aes(x=group, y=gmf11)) + 
-  geom_point()
-
-ggplot(ans.group.roundmeans, aes(x=group, y=gmf12)) + 
-  geom_point() +
-
-ggplot(ans.group.roundmeans, aes(x=group, y=gmf13)) + 
-  geom_point() 
-
-ggplot(ans.group.roundmeans, aes(x=group, y=gmm01)) + 
-  geom_point()
-
-ggplot(ans.group.roundmeans, aes(x=group, y=gmm02)) + 
-  geom_point() 
-
-ggplot(ans.group.roundmeans, aes(x=group, y=gmm03)) + 
-  geom_point()
-
-ggplot(ans.group.roundmeans, aes(x=group, y=gmvirkeys)) + 
-  geom_point()
-
-#answers per question 
-
-ggplot(ans.roundmeans, aes(x=group, y=mf01)) + 
-  geom_point() +
-  geom_jitter()
-
-ggplot(ans.roundmeans, aes(x=group, y=mf02)) + 
-  geom_point() +
-  geom_jitter()
-
-ggplot(ans.roundmeans, aes(x=group, y=mf03)) + 
-  geom_point() +
-  geom_jitter()
-
-ggplot(ans.roundmeans, aes(x=group, y=mf04)) + 
-  geom_point() +
-  geom_jitter()
-
-ggplot(ans.roundmeans, aes(x=group, y=mf05)) + 
-  geom_point() +
-  geom_jitter()
-
-ggplot(ans.roundmeans, aes(x=group, y=mf06)) + 
-  geom_point() +
-  geom_jitter()
-
-ggplot(ans.roundmeans, aes(x=group, y=mf07)) + 
-  geom_point() +
-  geom_jitter()
-
-ggplot(ans.roundmeans, aes(x=group, y=mf08)) + 
-  geom_point() +
-  geom_jitter()
-
-ggplot(ans.roundmeans, aes(x=group, y=mf09)) + 
-  geom_point() +
-  geom_jitter()
-
-ggplot(ans.roundmeans, aes(x=group, y=mf10)) + 
-  geom_point() +
-  geom_jitter()
-
-ggplot(ans.roundmeans, aes(x=group, y=mf11)) + 
-  geom_point() +
-  geom_jitter()
-
-ggplot(ans.roundmeans, aes(x=group, y=mf12)) + 
-  geom_point() +
-  geom_jitter()
-
-ggplot(ans.roundmeans, aes(x=group, y=mf13)) + 
-  geom_point() +
-  geom_jitter()
-
-ggplot(ans.roundmeans, aes(x=group, y=mm01)) + 
-  geom_point() +
-  geom_jitter()
-
-ggplot(ans.roundmeans, aes(x=group, y=mm02)) + 
-  geom_point() +
-  geom_jitter()
-
-ggplot(ans.roundmeans, aes(x=group, y=mm03)) + 
-  geom_point() +
-  geom_jitter()
-
-ggplot(ans.roundmeans, aes(x=group, y=mvirkeys)) + 
-  geom_point() +
-  geom_jitter()
-
+ggplot(ans.roundmeans, aes(x=factor(group), y=difficulty)) + 
+  geom_point() + 
+  geom_boxplot()
 
