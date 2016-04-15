@@ -159,8 +159,30 @@ ans.group <- ddply(ans, .(group, kierros), summarise,
 
 # multiple regression
 
-flowproduced <- lm(flow13 ~ group + sex + age + game_exp + liking + skill, data = ans.roundmeans)
+flowproduced <- lm(flow13 ~ factor(group) + factor(sex) + age + game_exp + liking + skill, data = ans.roundmeans)
 summary(flowproduced)
+
+library(car)
+Anova(flowproduced, type=3)
+
+difficulty.fm <- lm(difficulty ~ factor(group) + factor(sex) + age + game_exp + liking + skill, data = ans.roundmeans)
+summary(difficulty.fm)
+library(car)
+library(lsmeans)
+Anova(difficulty.fm, type=3)
+
+lsm <- lsmeans(difficulty.fm, pairwise ~ group)
+summary(lsm)
+
+f13.fm <- lm(f13 ~ factor(group) + factor(sex) + age + game_exp + liking + skill, data = ans.roundmeans)
+summary(f13.fm)
+Anova(f13.fm)
+
+lsm <- lsmeans(f13.fm, pairwise ~ group)
+summary(lsm)
+lsm <- lsmeans(f13.fm, poly ~ group)
+summary(lsm)
+
 
 #anova
 
@@ -201,6 +223,10 @@ ggplot(ans.roundmeans, aes(x=factor(group), y=flow3)) +
   geom_boxplot()
 
 ggplot(ans.roundmeans, aes(x=factor(group), y=difficulty)) + 
+  geom_point() + 
+  geom_boxplot()
+
+ggplot(ans.roundmeans, aes(x=factor(group), y=f13)) + 
   geom_point() + 
   geom_boxplot()
 

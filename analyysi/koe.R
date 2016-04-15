@@ -143,8 +143,6 @@ summarySEwithin <- function(data=NULL, measurevar, betweenvars=NULL, withinvars=
 {
 D <- read.table('data/datat.txt', sep=',', header=T)
 
-describeBy(D, group = D$isTestGame)
-
 
 success <- ddply(D, .(group, subId, roundId, isTestGame), summarise,
                     SIS = mean(successInStatic),
@@ -183,16 +181,27 @@ successSummary <- summarySEwithin(success, measurevar = "SIS",
 
 pd <- position_dodge(1)
 
-ggplot(successSummary, aes(x=roundId, y=SIS, colour=factor(group))) + 
+ggplot(successSummary, aes(x=roundId, y=SIS, colour=factor(group), group=factor(group))) + 
   geom_point(position = pd) +
   geom_line(position = pd) +
   geom_errorbar(width=.8, aes(ymin=SIS-ci, ymax=SIS+ci), position = pd) +
   facet_grid(isTestGame ~ ., scales = "free")
 
-ggplot(success.group, aes(x=roundId, y=SIS, colour=factor(group))) + 
-  geom_point() +
+ggplot(success.group, aes(x=roundId, y=SIS, shape=factor(group), colour=factor(group))) + 
+  geom_point(size=3) +
   geom_line() +
+  facet_grid(isTestGame ~ ., scales = "free") +
+  xlab("Round") + 
+  scale_shape_discrete(name="", labels=c("1"="20 %", "2"="50 %", "3"="90 %")) +
+  scale_colour_discrete(name="", labels=c("1"="20 %", "2"="50 %", "3"="90 %")) +
+  theme_bw(base_size=12)
+
+ggplot(success, aes(x=roundId, y=SIS, colour=factor(group))) + 
+  stat_summary(fun.data="mean_cl_normal", geom="errorbar", position=pd) +
+  geom_line(data=success.group) +
   facet_grid(isTestGame ~ ., scales = "free")
+
+
 
 ggplot(success.group, aes(x=roundId, y=PTS, colour=factor(group))) + 
   geom_point() +
@@ -278,11 +287,41 @@ ggplot(onlySuccess.group.MMI, aes(x=roundId, y=MMI, colour=factor(group))) +
   geom_point() +
   geom_line() +
   facet_grid(isTestGame ~ ., scales = "free")
-
 #splitted only succesfultests
 
 D.splittedTest <- split(D.splitted$`1`, D$isTestGame)
 
+
+
+# mixed effects model
+
+# fixed efektejä "joista ollaan kiinnostuneita"
+# sen lisäksi random efektillä otetaan huomioon varianssia josta ei olle kiinnostuneita
+
+
+library(nlme)
+library(lsmeans)
+
+options(contrasts = c("contr.sum", "contr.poly"))
+
+success.tests <- success[ success$isTestGame == 1,]
+success.tests$group <- factor(success.tests$group)
+success.tests$roundId <- ordered(success.tests$roundId)
+
+
+
+fm <- lme(SIS ~ roundId*group, random = ~ 1 | subId, data=success.tests)
+intervals(fm)
+summary(fm)
+plot(fm)
+qqnorm(resid(fm))
+
+anova(fm, type="marginal")
+
+
+lsmeans(fm, pairwise ~ group)
+lsmeans(fm, pairwise ~ roundId)
+lsm <- lsmeans(fm, poly ~ roundId)
 
 
 
