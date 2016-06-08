@@ -1,8 +1,11 @@
 library(plyr)
 library(ggplot2)
+library(car)
+library(nlme)
+library(lsmeans)
 
 #helper functions *********************************************************
-
+{
 
 #summarySE
 
@@ -138,18 +141,22 @@ summarySEwithin <- function(data=NULL, measurevar, betweenvars=NULL, withinvars=
 }
 
 #******************************************************************************************************
+}
 
 #read data
 {
 D <- read.table('data/datat.txt', sep=',', header=T)
 
+D.tests.flow <- merge(D, ans, by=c("subId", "roundId"))
 
 success <- ddply(D, .(group, subId, roundId, isTestGame), summarise,
                     SIS = mean(successInStatic),
                     PTS = mean(pressesToSuccess),
                     Inter = mean(gameInterval),
                     MI = min(gameInterval),
-                    PIC = mean(previousIntervalChange))                 
+                    PIC = mean(previousIntervalChange))
+
+success.flow <- merge(success, ans, by=c("subId", "roundId"))
 
 success.group <- ddply(D, .(group, roundId, isTestGame), summarise,
                        SIS = mean(successInStatic),
@@ -158,6 +165,12 @@ success.group <- ddply(D, .(group, roundId, isTestGame), summarise,
                        Inter = mean(gameInterval),
                        PIC = mean(previousIntervalChange)) 
 
+success.subject <-  ddply(D, .(subId, roundId, isTestGame), summarise,
+                       SIS = mean(successInStatic),
+                       SISsd = sd(successInStatic),
+                       PTS = mean(pressesToSuccess),
+                       Inter = mean(gameInterval),
+                       PIC = mean(previousIntervalChange)) 
 }
 
 #anova
@@ -168,24 +181,119 @@ success.tests$groupFact <- factor(success.tests$group)
 fm <- lm(SIS ~ roundFact * groupFact, data=success.tests)
 summary(fm)
 options("contrasts"=c("contr.sum", "contr.poly"))
-library(car)
 Anova(fm, type=3)
 }
-#groups success
 
+# mixed effects model
+{
+# fixed efektejä "joista ollaan kiinnostuneita"
+# sen lisäksi random efektillä otetaan huomioon varianssia josta ei olle kiinnostuneita
+
+
+#round and group effects on SIS
+{
+options(contrasts = c("contr.sum", "contr.poly"))
+
+success.tests <- success[ success$isTestGame == 1,]
+success.tests$group <- factor(success.tests$group)
+success.tests$roundId <- ordered(success.tests$roundId)
+
+
+
+fm <- lme(SIS ~ roundId*group, random = ~ 1 | subId, data=success.tests)
+intervals(fm)
+summary(fm)
+plot(fm)
+qqnorm(resid(fm))
+
+anova(fm, type="marginal")
+
+
+lsmeans(fm, pairwise ~ group)
+lsmeans(fm, pairwise ~ roundId)
+lsm <- lsmeans(fm, poly ~ roundId)
+summary(lsm)
+}
+
+#flow's effect on learning
+{
+options(contrasts = c("contr.sum", "contr.poly"))
+
+success.flow$roundId <- ordered(success.flow$roundId)
+
+fm <- lme(SIS ~ flow10, random = ~ 1 | subId, data=success.flow)
+intervals(fm)
+summary(fm)
+
+anova(fm, type = "marginal")
+
+}
+}
+
+# correlations plot with success
+{
+
+ggplot(success.flow, aes(x=f12, y=SIS)) +
+  geom_point(shape=1,
+             position=position_jitter(width=0.5,height=0)) +    # Use hollow circles
+  geom_smooth(method=lm,   # Add linear regression line
+              se=FALSE)    # Don't add shaded confidence region
+}
+
+# regression analysis
+{
+SIS.fm <- lm(SIS ~  flow10 + motiv3 + f11 + f12 + f13 + age + liking + skill, data = success.flow)
+summary(SIS.fm)
+Anova(SIS.fm, type=3)
+
+f12.fm <- lm(f12 ~  flow10 + motiv3 + f11 + SIS + f13 + age + liking + skill, data = success.flow)
+summary(f12.fm)
+Anova(f12.fm, type=3)
+}
+
+#group success graphs
+{
+{
 successSummary <- summarySEwithin(success, measurevar = "SIS", 
                                   betweenvars = c("group","isTestGame"), 
                                   withinvars = "roundId", 
                                   idvar = "subId",
                                   na.rm = FALSE, conf.interval = .95, .drop = TRUE)
 
-pd <- position_dodge(1)
+pd <- position_dodge(.7)
 
-ggplot(successSummary, aes(x=roundId, y=SIS, colour=factor(group), group=factor(group))) + 
-  geom_point(position = pd) +
-  geom_line(position = pd) +
-  geom_errorbar(width=.8, aes(ymin=SIS-ci, ymax=SIS+ci), position = pd) +
-  facet_grid(isTestGame ~ ., scales = "free")
+labels <- c("0" = "Training", "1" = "Tests")
+
+pdf("plots.pdf", width=8/2.54, height=(8*(344/422))/2.54)
+
+ggplot(successSummary, aes(x=ordered(roundId), y=SIS, colour=factor(group), group=factor(group))) + 
+  geom_point(position = pd, size = 1.2, aes(shape = factor(group))) +
+  geom_line(position = pd, size = 0.4) +
+  geom_errorbar(width=1, size = 0.4, aes(ymin=SIS-ci, ymax=SIS+ci), position = pd) +
+  xlab("Round") + 
+  theme_classic() +
+  scale_shape_discrete(name="", labels=c("1"="hard", "2"="medium", "3"="easy")) +
+  scale_colour_discrete(name="", labels=c("1"="hard", "2"="medium", "3"="easy")) +
+  theme(legend.title=element_blank()) +
+  theme(legend.text = element_text(size = 8)) +
+  theme(legend.background = element_rect(fill="transparent", colour=NA)) + 
+  theme(legend.position= c(1.14, 0.52)) + 
+  theme(panel.grid.minor.x=element_blank(),
+        panel.grid.major.x=element_blank()) + 
+  theme(axis.title.x = element_text(size=10),
+        axis.text.x  = element_text(size=6),
+        axis.ticks.x = element_blank()) + 
+  theme(axis.title.y = element_text(angle=90, size=10),
+        axis.text.y  = element_text(size=6)) +
+  ylab("Successrate") + 
+  facet_grid(isTestGame ~ ., labeller=labeller(isTestGame = labels), scales = "free") +
+    theme(strip.text.y = element_text(size = 10, angle=0),
+        strip.background = element_rect(colour ="white", fill = "#FFFFFF")) +
+  ggtitle("Successrate in training and testgames") + 
+  theme(plot.title = element_text(size = 12))
+
+dev.off()
+}
 
 ggplot(success.group, aes(x=roundId, y=SIS, shape=factor(group), colour=factor(group))) + 
   geom_point(size=3) +
@@ -200,7 +308,6 @@ ggplot(success, aes(x=roundId, y=SIS, colour=factor(group))) +
   stat_summary(fun.data="mean_cl_normal", geom="errorbar", position=pd) +
   geom_line(data=success.group) +
   facet_grid(isTestGame ~ ., scales = "free")
-
 
 
 ggplot(success.group, aes(x=roundId, y=PTS, colour=factor(group))) + 
@@ -218,8 +325,35 @@ ggplot(success.group, aes(x=roundId, y=PIC, colour=factor(group))) +
   geom_point() +
   geom_line() +
   facet_grid(isTestGame ~ ., scales = "free")
+}
 
 #individual success graphs
+{
+
+gamelabels <- c("0" = "Training", "1" = "Tests")
+grouplabels <- c("1" = "Hard", "2" = "Medium", "3" = "Easy")
+ggplot(success, aes(x=ordered(roundId), y=SIS, colour=factor(subId), group=factor(group))) + 
+  geom_point(size = 3.5) +
+  geom_line(size = 0.6) +
+  xlab("Round") + 
+  theme_bw() +
+  theme(panel.grid.minor=element_blank(),
+        panel.grid.major=element_blank()) +
+  theme(legend.position="none") +
+  theme(panel.grid.minor.x=element_blank(),
+        panel.grid.major.x=element_blank()) + 
+  theme(axis.title.x = element_text(size=18),
+        axis.text.x  = element_text(size=16),
+        axis.ticks.x = element_blank()) + 
+  theme(axis.title.y = element_text(angle=0, size=18),
+        axis.text.y  = element_text(size=16)) +
+  ylab("Rate") + 
+  facet_grid(isTestGame ~ group, labeller=labeller(isTestGame = gamelabels, group = grouplabels), scales = "free") +
+  theme(strip.text.y = element_text(size = 18, angle=0, face="bold"),
+        strip.text.x = element_text(size = 18, angle=0, face="bold"),
+        strip.background = element_rect(colour ="white", fill = "#FFFFFF")) +
+  ggtitle("Individual successrates in training and testgames") + 
+  theme(plot.title = element_text(size = 18))
 
 ggplot(success, aes(x=roundId, y=SIS, colour=subId)) + 
   geom_point() +
@@ -241,9 +375,10 @@ ggplot(success, aes(x=roundId, y=MI, colour=subId)) +
   geom_point() +
   geom_line() +
   facet_grid(isTestGame ~ ., scales = "free")
-
+}
 
 #splitted only successful games
+{
 
 D.splitted <- split(D, D$successInStatic)
 
@@ -262,8 +397,11 @@ onlySuccess.group <- ddply(D.splitted$`1`, .(group, roundId, isTestGame), summar
 
 onlySuccess.group.MMI <- ddply(onlySuccess, .(group, roundId, isTestGame), summarise,
                                 MMI = mean(MI))
-#Succesful interval mins
+}
 
+
+#Succesful interval mins
+{
 ggplot(onlySuccess, aes(x=roundId, y=MI, colour=factor(subId))) + 
   geom_point() +
   geom_line() +
@@ -287,42 +425,7 @@ ggplot(onlySuccess.group.MMI, aes(x=roundId, y=MMI, colour=factor(group))) +
   geom_point() +
   geom_line() +
   facet_grid(isTestGame ~ ., scales = "free")
-#splitted only succesfultests
-
-D.splittedTest <- split(D.splitted$`1`, D$isTestGame)
-
-
-
-# mixed effects model
-
-# fixed efektejÃ¤ "joista ollaan kiinnostuneita"
-# sen lisÃ¤ksi random efektillÃ¤ otetaan huomioon varianssia josta ei olle kiinnostuneita
-
-
-library(nlme)
-library(lsmeans)
-
-options(contrasts = c("contr.sum", "contr.poly"))
-
-success.tests <- success[ success$isTestGame == 1,]
-success.tests$group <- factor(success.tests$group)
-success.tests$roundId <- ordered(success.tests$roundId)
-
-
-
-fm <- lme(SIS ~ roundId*group, random = ~ 1 | subId, data=success.tests)
-intervals(fm)
-summary(fm)
-plot(fm)
-qqnorm(resid(fm))
-
-anova(fm, type="marginal")
-
-
-lsmeans(fm, pairwise ~ group)
-lsmeans(fm, pairwise ~ roundId)
-lsm <- lsmeans(fm, poly ~ roundId)
-
+}
 
 
 
