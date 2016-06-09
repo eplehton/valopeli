@@ -2,6 +2,8 @@ library(plyr)
 library(ggplot2)
 library(car)
 library(lsmeans)
+library(lsr)
+library(heplots)
 
 #functions
 {
@@ -256,6 +258,9 @@ ans.group <- ddply(ans, .(group, kierros), summarise,
 )
 }
 
+
+options(contrasts = c("contr.sum", "contr.poly"))
+
 # multiple regression and anovas
 {
 flow13.fm <- lm(flow13 ~ factor(group) + factor(sex) + age + liking + skill, data = ans.roundmeans)
@@ -266,13 +271,47 @@ summary(lsm)
 lsm <- lsmeans(flow13.fm, poly ~ group)
 summary(lsm)
 
-flow10.fm <- lm(flow10 ~ factor(sex) + age + liking + skill + f11 + f12 + f13, data = ans.roundmeans)
+flow10.fm <- lm(flow10 ~ factor(group) + factor(sex) + age + liking + skill + f11 + f12 + f13, data = ans.roundmeans)
 summary(flow10.fm)
 Anova(flow10.fm, type=3)
 lsm <- lsmeans(flow10.fm, pairwise ~ group)
 summary(lsm)
 lsm <- lsmeans(flow10.fm, poly ~ group)
 summary(lsm)
+
+flow10.fm <- lm(flow10 ~ factor(group)*kierros, data = ans)
+summary(flow10.fm)
+anova(flow10.fm)
+Anova(flow10.fm, type=3)
+
+flow10.fm.0 <- lm(flow10 ~ factor(group)*kierros, data = ans)
+Anova(flow10.fm.0, type=3)
+
+etasq(flow10.fm.0)
+
+#ezANOVA(ans, dv=flow10, wid=subId, within=kierros, between=.(factor(group), sex1n0m))
+
+flow10.fm.1 <- lm(flow10 ~ factor(group)*kierros + factor(sex1n0m) + age + liking + skill + f11 + f12 + f13, data = ans)
+Anova(flow10.fm.1, type=3)
+
+
+flow10.fm.2 <- lm(flow10 ~ factor(group)*kierros + factor(sex1n0m) + age + liking + skill + f11 + f12 + f13 + virkeys, data = ans)
+Anova(flow10.fm.2, type=3)
+
+flow10.fm.3 <- lm(flow10 ~ factor(group)*kierros + factor(sex1n0m) + age + ordered(liking) +  ordered(skill) +ordered(f12) + ordered(virkeys), data = ans)
+Anova(flow10.fm.3, type=3)
+
+with(ans, cor( data.frame( group, kierros, sex1n0m, age, liking, skill, f11, f12, f13), use="complete.obs"))
+
+vif(flow10.fm.3)
+
+
+flow10.fm.3 <- lm(flow10 ~ factor(group)*kierros + factor(sex1n0m) + age + ordered(liking) + ordered(f11) + ordered(f12) + ordered(f13) + ordered(virkeys), data = ans)
+Anova(flow10.fm.3, type=3)
+
+flow10.fm.3 <- lm(flow10 ~ factor(group)*kierros + factor(sex1n0m) + age + ordered(liking) + ordered(f11) + ordered(f12)+ ordered(virkeys), data = ans)
+Anova(flow10.fm.3, type=3)
+
 
 difficulty.fm <- lm(difficulty ~ factor(group) + factor(sex) + age + liking + skill, data = ans.roundmeans)
 summary(difficulty.fm)
@@ -307,7 +346,7 @@ summary(lsm)
 lsm <- lsmeans(f11.fm, poly ~ group)
 summary(lsm)
 
-motiv3.fm <- lm(motiv3 ~ factor(group) + factor(sex) + age + liking + skill, data = ans.roundmeans)
+motiv3.fm <- lm(motiv3 ~ factor(group)*kierros + factor(sex1n0m) + age + liking + skill, data = ans)
 summary(motiv3.fm)
 Anova(motiv3.fm, type=3)
 lsm <- lsmeans(motiv3.fm, pairwise ~ group)

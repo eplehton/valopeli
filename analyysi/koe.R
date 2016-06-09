@@ -186,8 +186,8 @@ Anova(fm, type=3)
 
 # mixed effects model
 {
-# fixed efektejä "joista ollaan kiinnostuneita"
-# sen lisäksi random efektillä otetaan huomioon varianssia josta ei olle kiinnostuneita
+# fixed efektej? "joista ollaan kiinnostuneita"
+# sen lis?ksi random efektill? otetaan huomioon varianssia josta ei olle kiinnostuneita
 
 
 #round and group effects on SIS
@@ -240,9 +240,11 @@ ggplot(success.flow, aes(x=f12, y=SIS)) +
               se=FALSE)    # Don't add shaded confidence region
 }
 
+with(success.flow, cor(data.frame(flow10,motiv3,f11,f12,f13,age,liking,virkeys), use="complete.obs"))
+
 # regression analysis
 {
-SIS.fm <- lm(SIS ~  flow10 + motiv3 + f11 + f12 + f13 + age + liking + skill, data = success.flow)
+SIS.fm <- lm(SIS ~  flow10 + motiv3 + ordered(f11) + ordered(f12) + ordered(f13) + age + ordered(liking) + ordered(virkeys), data = success.flow)
 summary(SIS.fm)
 Anova(SIS.fm, type=3)
 
@@ -264,9 +266,9 @@ pd <- position_dodge(.7)
 
 labels <- c("0" = "Training", "1" = "Tests")
 
-pdf("plots.pdf", width=8/2.54, height=(8*(344/422))/2.54)
+#pdf("plots.pdf", width=8/2.54, height=(8*(344/422))/2.54)
 
-ggplot(successSummary, aes(x=ordered(roundId), y=SIS, colour=factor(group), group=factor(group))) + 
+g <- ggplot(successSummary, aes(x=ordered(roundId), y=SIS, colour=factor(group), group=factor(group))) + 
   geom_point(position = pd, size = 1.2, aes(shape = factor(group))) +
   geom_line(position = pd, size = 0.4) +
   geom_errorbar(width=1, size = 0.4, aes(ymin=SIS-ci, ymax=SIS+ci), position = pd) +
@@ -274,25 +276,30 @@ ggplot(successSummary, aes(x=ordered(roundId), y=SIS, colour=factor(group), grou
   theme_classic() +
   scale_shape_discrete(name="", labels=c("1"="hard", "2"="medium", "3"="easy")) +
   scale_colour_discrete(name="", labels=c("1"="hard", "2"="medium", "3"="easy")) +
-  theme(legend.title=element_blank()) +
-  theme(legend.text = element_text(size = 8)) +
-  theme(legend.background = element_rect(fill="transparent", colour=NA)) + 
-  theme(legend.position= c(1.14, 0.52)) + 
-  theme(panel.grid.minor.x=element_blank(),
-        panel.grid.major.x=element_blank()) + 
-  theme(axis.title.x = element_text(size=10),
-        axis.text.x  = element_text(size=6),
-        axis.ticks.x = element_blank()) + 
-  theme(axis.title.y = element_text(angle=90, size=10),
-        axis.text.y  = element_text(size=6)) +
+#   theme(legend.title=element_blank()) +
+#   theme(legend.text = element_text(size = 8)) +
+#   theme(legend.background = element_rect(fill="transparent", colour=NA)) + 
+#   theme(legend.position= c(1.14, 0.52)) + 
+#   theme(panel.grid.minor.x=element_blank(),
+#         panel.grid.major.x=element_blank()) + 
+#   theme(axis.title.x = element_text(size=10),
+#         axis.text.x  = element_text(size=6),
+#         axis.ticks.x = element_blank()) + 
+#   theme(axis.title.y = element_text(angle=90, size=10),
+#         axis.text.y  = element_text(size=6)) +
   ylab("Successrate") + 
   facet_grid(isTestGame ~ ., labeller=labeller(isTestGame = labels), scales = "free") +
     theme(strip.text.y = element_text(size = 10, angle=0),
         strip.background = element_rect(colour ="white", fill = "#FFFFFF")) +
-  ggtitle("Successrate in training and testgames") + 
-  theme(plot.title = element_text(size = 12))
+  ggtitle("Successrate in training and testgames")
+  #+ 
+  #theme(plot.title = element_text(size = 12))
+print(g)
+g2 <- g + theme_classic(base_size=6)
+print(g2)
 
-dev.off()
+ggsave("plots.pdf", plot=g2, width=8, height=(8*(344/422)), units="cm", dpi=300)
+#dev.off()
 }
 
 ggplot(success.group, aes(x=roundId, y=SIS, shape=factor(group), colour=factor(group))) + 
@@ -332,8 +339,8 @@ ggplot(success.group, aes(x=roundId, y=PIC, colour=factor(group))) +
 
 gamelabels <- c("0" = "Training", "1" = "Tests")
 grouplabels <- c("1" = "Hard", "2" = "Medium", "3" = "Easy")
-ggplot(success, aes(x=ordered(roundId), y=SIS, colour=factor(subId), group=factor(group))) + 
-  geom_point(size = 3.5) +
+ggplot(success, aes(x=ordered(roundId), y=SIS, colour=factor(subId), group=factor(subId))) + 
+  #geom_point(size = 3.5) +
   geom_line(size = 0.6) +
   xlab("Round") + 
   theme_bw() +
